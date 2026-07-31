@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CONFIGURASI GPON UPAZNET – UNB Script Generator</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     HEADER
+════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="8" rx="2"/>
+        <rect x="2" y="14" width="20" height="8" rx="2"/>
+        <line x1="6" y1="6"  x2="6.01" y2="6"/>
+        <line x1="6" y1="18" x2="6.01" y2="18"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">CONFIGURASI GPON UPAZNET</div>
+      <div class="header-sub">Helpdesk Tool &mdash; UNB Script Generator</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active">UNB</button>
+    <button class="tab">FTTH</button>
+    <button class="tab">TOOLS</button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════
+     MAIN GRID (3 KOLOM)
+════════════════════════════════════ -->
+<div class="main-grid">
+
+  <!-- ═══ KOLOM KIRI: FORM INPUT ═══ -->
+  <div class="card">
+    <div class="card-header">Form Input</div>
+    <div class="card-body">
+
+      <!-- Quick Fill -->
+      <button class="btn-quick-fill" id="btnQuickFill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Quick Fill dari Detail ONU
+      </button>
+
+      <!-- Tipe Konfigurasi -->
+      <div class="form-group">
+        <label class="form-label" for="configType">Tipe Konfigurasi</label>
+        <select class="form-control" id="configType">
+          <optgroup label="── Standard (PPPoE) ──">
+            <option value="v100">UNB V100</option>
+            <option value="v1600">UNB V1600 (AL KHORIYAH)</option>
+            <option value="v1501">UNB V1501 (BOLO)</option>
+            <option value="v602">UNB V602 (ALNET)</option>
+            <option value="v903">UNB V903 (LEXXA)</option>
+            <option value="v511">UNB V511 (CADAR)</option>
+          </optgroup>
+          <optgroup label="── Bridge Mode ──">
+            <option value="bridge">UNB Bridge</option>
+            <option value="bridge_bolo">Bridge Bolo</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Interface OLT + ONU ID -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="interfaceOlt">Interface OLT</label>
+          <input class="form-control" id="interfaceOlt" type="text"
+                 placeholder="e.g. 1/4/2" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="onuId">ONU ID</label>
+          <input class="form-control" id="onuId" type="text"
+                 placeholder="e.g. 88" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- Serial Number -->
+      <div class="form-group">
+        <label class="form-label" for="sn">Serial Number (SN)</label>
+        <input class="form-control" id="sn" type="text"
+               placeholder="e.g. HWTCDF67C578" autocomplete="off"
+               style="text-transform:uppercase;"/>
+      </div>
+
+      <!-- Section Header -->
+      <div class="form-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83
+                   M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+        Konfigurasi PPPoE Secret &amp; Pelanggan
+      </div>
+
+      <!-- ID Pelanggan + Nama Pelanggan -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="idPelanggan">ID Pelanggan</label>
+          <input class="form-control" id="idPelanggan" type="text"
+                 placeholder="e.g. 2010102081" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="namaPelanggan">Nama Pelanggan</label>
+          <input class="form-control" id="namaPelanggan" type="text"
+                 placeholder="e.g. IR. BAMBANG SUTOMO" autocomplete="off"
+                 style="text-transform:uppercase;"/>
+        </div>
+      </div>
+
+      <!-- Paket + PPPoE User + PPPoE Pass -->
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label" for="paketLayanan">Paket Layanan</label>
+          <select class="form-control" id="paketLayanan">
+            <option value="KUSUMA 1">KUSUMA 1</option>
+            <option value="KUSUMA 2">KUSUMA 2</option>
+            <option value="KUSUMA 3">KUSUMA 3</option>
+            <option value="METRO 10">METRO 10</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pppoeUser">PPPoE User</label>
+          <input class="form-control" id="pppoeUser" type="text"
+                 placeholder="e.g. 2010102081" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pppoePass">PPPoE Pass</label>
+          <input class="form-control" id="pppoePass" type="text"
+                 placeholder="e.g. 150326" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <button class="btn-generate" id="btnGenerate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6
+                   M2 11.5a10 10 0 0 1 18.8-4.3
+                   M22 12.5a10 10 0 0 1-18.8 4.2"/>
+        </svg>
+        Generate Script
+      </button>
+
+    </div>
+  </div><!-- /KOLOM KIRI -->
+
+  <!-- ═══ KOLOM TENGAH: SCRIPT OUTPUT ═══ -->
+  <div class="output-col">
+
+    <!-- Box 1: OLT ZTE -->
+    <div class="script-box">
+      <div class="script-box-header">
+        <div class="script-box-title">
+          <span class="dot dot-olt"></span>
+          Script OLT (ZTE)
+        </div>
+        <button class="btn-copy" id="copyOlt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy
+        </button>
+      </div>
+      <pre class="script-content" id="outputOlt"><span class="script-placeholder">// Isi form dan klik "Generate Script" untuk menampilkan script OLT ZTE...</span></pre>
+    </div>
+
+    <!-- Box 2: Mikrotik PPPoE Secret -->
+    <div class="script-box">
+      <div class="script-box-header">
+        <div class="script-box-title">
+          <span class="dot dot-mkt"></span>
+          Script Mikrotik (PPPoE Secret)
+        </div>
+        <button class="btn-copy" id="copyMkt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy
+        </button>
+      </div>
+      <pre class="script-content mkt" id="outputMkt"><span class="script-placeholder">// Script Mikrotik PPPoE Secret akan muncul di sini...</span></pre>
+    </div>
+
+  </div><!-- /KOLOM TENGAH -->
+
+  <!-- ═══ KOLOM KANAN: COMMAND HUB ═══ -->
+  <div class="cmd-hub">
+    <div class="cmd-hub-header">
+      <div class="cmd-hub-title">&gt; COMMAND HUB</div>
+      <div class="badge-toggle">C300/C320</div>
+    </div>
+    <div class="cmd-list" id="cmdList">
+      <!-- Populated by app.js -->
+    </div>
+  </div><!-- /KOLOM KANAN -->
+
+</div><!-- /MAIN GRID -->
+
+<!-- ════════════════════════════════════
+     MODAL QUICK FILL
+════════════════════════════════════ -->
+<div id="qfModal" class="qf-overlay" style="display:none;" role="dialog"
+     aria-modal="true" aria-labelledby="qfTitle">
+  <div class="qf-modal">
+
+    <!-- Header -->
+    <div class="qf-header">
+      <div class="qf-header-title" id="qfTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Quick Fill
+      </div>
+      <button class="qf-close" id="qfClose" aria-label="Tutup">&times;</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="qf-tabs">
+      <button class="qf-tab" id="tabKoneksi">Detail Koneksi</button>
+      <button class="qf-tab active" id="tabOnu">Detail ONU</button>
+    </div>
+
+    <!-- Panel: Detail Koneksi -->
+    <div class="qf-panel" id="panelKoneksi" style="display:none;">
+      <p class="qf-desc">
+        Paste teks dari halaman <strong>Detail Koneksi</strong> pelanggan di sistem internal.
+      </p>
+      <textarea class="qf-textarea" id="pasteKoneksi"
+        placeholder="Paste teks dari halaman Detail Koneksi di sini...
+
+Contoh:
+ID Pelanggan  : 2010102081
+Nama          : IR. BAMBANG SUTOMO
+PPPoE User    : 2010102081
+PPPoE Pass    : 150326"></textarea>
+    </div>
+
+    <!-- Panel: Detail ONU -->
+    <div class="qf-panel" id="panelOnu">
+      <p class="qf-desc">
+        Paste teks dari halaman <strong>Detail ONU</strong> di sistem internal.
+      </p>
+      <textarea class="qf-textarea" id="pasteOnu"
+        placeholder="Paste teks dari halaman Detail ONU di sini...
+
+Contoh:
+ONU interface:	gpon-onu_1/3/16:10	Config state:	success
+Name:	2010100005	Serial number:	HWTCDF6AE2C8
+Type:	ALL-ONT	Description:	2010100005 - HADI PURWANTO"></textarea>
+    </div>
+
+    <!-- Footer -->
+    <div class="qf-footer">
+      <button class="qf-btn-cancel" id="qfCancel">Batal</button>
+      <button class="qf-btn-submit" id="qfSubmit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Isi Form Otomatis
+      </button>
+    </div>
+
+  </div>
+</div><!-- /MODAL -->
+
+<!-- Toast Container -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Footer -->
+<footer class="app-footer">
+  Boyolangu NOC Administrator &mdash; GPON UNB UPAZNET &copy; 2025
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
