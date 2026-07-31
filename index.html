@@ -193,14 +193,24 @@
           <span class="dot dot-olt"></span>
           Script OLT (ZTE)
         </div>
-        <button class="btn-copy" id="copyOlt">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-          Copy
-        </button>
+        <div class="script-box-actions">
+          <button class="btn-export" id="exportOlt" title="Download .txt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="btn-copy" id="copyOlt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
       </div>
       <pre class="script-content" id="outputOlt"><span class="script-placeholder">// Isi form dan klik "Generate Script" untuk menampilkan script OLT ZTE...</span></pre>
     </div>
@@ -212,16 +222,43 @@
           <span class="dot dot-mkt"></span>
           Script Mikrotik (PPPoE Secret)
         </div>
-        <button class="btn-copy" id="copyMkt">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-          Copy
-        </button>
+        <div class="script-box-actions">
+          <button class="btn-export" id="exportMkt" title="Download .txt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="btn-copy" id="copyMkt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
       </div>
       <pre class="script-content mkt" id="outputMkt"><span class="script-placeholder">// Script Mikrotik PPPoE Secret akan muncul di sini...</span></pre>
+    </div>
+
+    <!-- History Panel -->
+    <div class="history-box" id="historyBox" style="display:none;">
+      <div class="history-header">
+        <div class="history-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          History Script
+          <span class="history-badge" id="historyCount">0</span>
+        </div>
+        <button class="btn-clear-history" id="btnClearHistory" title="Hapus semua history">Hapus Semua</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
     </div>
 
   </div><!-- /KOLOM TENGAH -->
@@ -349,6 +386,145 @@
           Hitung Subnet
         </button>
         <div id="subnetResult" class="subnet-result" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 3: Mikrotik Script Generator -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M8 12h8M12 8v8"/>
+        </svg>
+        Mikrotik Script Generator
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Generate script Mikrotik: Simple Queue, IP Pool, Static IP, dan Firewall NAT Masquerade.</p>
+
+        <!-- Sub-tabs -->
+        <div class="mkt-tabs">
+          <button class="mkt-tab active" data-mkt="queue">Simple Queue</button>
+          <button class="mkt-tab" data-mkt="pool">IP Pool</button>
+          <button class="mkt-tab" data-mkt="static">Static IP</button>
+          <button class="mkt-tab" data-mkt="nat">NAT Masquerade</button>
+        </div>
+
+        <!-- Panel: Simple Queue -->
+        <div class="mkt-panel" id="mktPanelQueue">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mqName">Nama Queue</label>
+              <input class="form-control" id="mqName" placeholder="e.g. 2010102081" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqTarget">Target IP</label>
+              <input class="form-control" id="mqTarget" placeholder="e.g. 192.168.1.10/32" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqUp">Max Upload</label>
+              <input class="form-control" id="mqUp" placeholder="e.g. 10M" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqDown">Max Download</label>
+              <input class="form-control" id="mqDown" placeholder="e.g. 10M" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqComment">Komentar</label>
+              <input class="form-control" id="mqComment" placeholder="e.g. NAMA PELANGGAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate" id="btnMktQueue" style="margin-top:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: IP Pool -->
+        <div class="mkt-panel" id="mktPanelPool" style="display:none;">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mpName">Nama Pool</label>
+              <input class="form-control" id="mpName" placeholder="e.g. pool-kusuma1" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mpRange">Range IP</label>
+              <input class="form-control" id="mpRange" placeholder="e.g. 10.10.1.2-10.10.1.254" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate" id="btnMktPool" style="margin-top:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: Static IP -->
+        <div class="mkt-panel" id="mktPanelStatic" style="display:none;">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="msUser">PPPoE User</label>
+              <input class="form-control" id="msUser" placeholder="e.g. 2010102081" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msIp">IP Address</label>
+              <input class="form-control" id="msIp" placeholder="e.g. 10.10.1.5" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msProfile">Profile PPPoE</label>
+              <input class="form-control" id="msProfile" placeholder="e.g. KUSUMA 1" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msComment">Komentar</label>
+              <input class="form-control" id="msComment" placeholder="e.g. NAMA PELANGGAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate" id="btnMktStatic" style="margin-top:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: NAT Masquerade -->
+        <div class="mkt-panel" id="mktPanelNat" style="display:none;">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mnChain">Chain</label>
+              <select class="form-control" id="mnChain">
+                <option value="srcnat">srcnat</option>
+                <option value="dstnat">dstnat</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnOutIface">Out Interface</label>
+              <input class="form-control" id="mnOutIface" placeholder="e.g. ether1-WAN" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnSrcAddr">Src Address (opsional)</label>
+              <input class="form-control" id="mnSrcAddr" placeholder="e.g. 192.168.0.0/24" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnComment">Komentar</label>
+              <input class="form-control" id="mnComment" placeholder="e.g. NAT LAN ke WAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate" id="btnMktNat" style="margin-top:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Output -->
+        <div id="mktScriptResult" class="mkt-script-result" style="display:none;">
+          <div class="mkt-script-result-header">
+            <span>Generated Script</span>
+            <button class="btn-copy" id="copyMktTool">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="mkt-script-output" id="mktScriptOutput"></pre>
+        </div>
+
       </div>
     </div>
 

@@ -245,6 +245,19 @@ option   { font-weight: 400; color: #1e293b; }
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid #263850;
 }
+.script-box-actions { display: flex; align-items: center; gap: 5px; }
+.btn-export {
+  padding: 3px 7px;
+  background: transparent;
+  border: 1px solid #2d4a6a;
+  border-radius: 5px;
+  color: #4a6580;
+  cursor: pointer;
+  display: flex; align-items: center;
+  transition: all .15s;
+}
+.btn-export:hover { border-color: #3b82f6; color: #3b82f6; }
+.btn-export svg { width: 11px; height: 11px; }
 .script-box-title {
   display: flex; align-items: center; gap: 8px;
   font-size: 10px; font-weight: 700;
@@ -340,8 +353,19 @@ option   { font-weight: 400; color: #1e293b; }
   margin-top: 4px;
   border-bottom: 1px solid #1e3a5f;
   margin-bottom: 3px;
+  display: flex; align-items: center;
+  cursor: pointer;
+  user-select: none;
 }
 .cmd-group-header:first-child { margin-top: 0; }
+.cmd-group-header .chev {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 10px;
+  transition: transform .2s;
+  display: inline-block;
+}
+.cmd-group-header.collapsed .chev { transform: rotate(-90deg); }
 
 .cmd-card {
   background: #0e2035;
@@ -431,7 +455,7 @@ option   { font-weight: 400; color: #1e293b; }
 .main-grid { position: relative; }
 .tab-panel {
   padding: 20px 14px 28px;
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
@@ -632,7 +656,117 @@ option   { font-weight: 400; color: #1e293b; }
 .qf-btn-submit:active { transform: translateY(0); }
 .qf-btn-submit svg { width: 14px; height: 14px; }
 
-/* ── FOOTER ────────────────────────────────────────────────── */
+/* ── HISTORY PANEL ─────────────────────────────────────────── */
+.history-box {
+  background: #0B192C;
+  border-radius: 12px;
+  border: 1px solid #1e3a5f;
+  overflow: hidden;
+}
+.history-header {
+  background: #1E293B;
+  padding: 9px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #263850;
+}
+.history-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; color: #64748b;
+  text-transform: uppercase;
+}
+.history-title svg { width: 12px; height: 12px; color: #3b82f6; }
+.history-badge {
+  background: #3b82f6;
+  color: #fff;
+  font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 20px;
+  letter-spacing: 0;
+}
+.btn-clear-history {
+  background: transparent;
+  border: 1px solid #2d4a6a;
+  border-radius: 5px;
+  color: #f87171;
+  font-size: 9px; font-weight: 600;
+  padding: 3px 8px; cursor: pointer;
+  transition: all .15s;
+}
+.btn-clear-history:hover { background: rgba(248,113,113,.08); border-color: #f87171; }
+.history-list { padding: 6px 8px; max-height: 220px; overflow-y: auto; }
+.history-list::-webkit-scrollbar       { width: 3px; }
+.history-list::-webkit-scrollbar-track { background: #0B192C; }
+.history-list::-webkit-scrollbar-thumb { background: #2d4a6a; border-radius: 4px; }
+.history-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background .12s;
+  border: 1px solid transparent;
+}
+.history-item:hover { background: #0d253d; border-color: #1e3a5f; }
+.history-item-meta { flex: 1; min-width: 0; }
+.history-item-title {
+  font-size: 10.5px; font-weight: 600; color: #a7f3d0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.history-item-sub {
+  font-size: 9.5px; color: #4a6580; margin-top: 1px;
+}
+.history-item-btn {
+  background: transparent;
+  border: 1px solid #2d4a6a;
+  border-radius: 4px;
+  color: #4a6580; font-size: 9px;
+  padding: 2px 7px; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+  transition: all .12s;
+}
+.history-item-btn:hover { border-color: #10B981; color: #10B981; }
+
+/* ── MIKROTIK TOOL CARD ────────────────────────────────────── */
+.mkt-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e8edf3;
+  padding-bottom: 8px;
+}
+.mkt-tab {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px; font-weight: 600; color: #64748b;
+  cursor: pointer; transition: all .13s;
+}
+.mkt-tab:hover { border-color: #059669; color: #059669; }
+.mkt-tab.active { background: #059669; border-color: #059669; color: #fff; }
+.mkt-panel { margin-top: 4px; }
+.mkt-script-result {
+  margin-top: 12px;
+  background: #0B192C;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #1e3a5f;
+}
+.mkt-script-result-header {
+  background: #1E293B;
+  padding: 7px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; font-weight: 700;
+  color: #64748b; letter-spacing: .1em; text-transform: uppercase;
+  border-bottom: 1px solid #263850;
+}
+.mkt-script-output {
+  padding: 12px 14px;
+  font-family: "Cascadia Code","Fira Code","Consolas",monospace;
+  font-size: 11px; line-height: 1.85;
+  color: #fde68a;
+  white-space: pre-wrap; word-break: break-all;
+  margin: 0;
+}
+
 .app-footer {
   text-align: center;
   padding: 16px;

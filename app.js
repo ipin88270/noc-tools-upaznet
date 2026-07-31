@@ -423,6 +423,10 @@ function esc(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+/* ── COLLAPSED STATE UNTUK CMD GROUPS ────────────────────────
+   Simpan state per grup (key = group label, value = true=collapsed)  */
+const CMD_GROUP_STATE = {};
+
 function renderCmdHub(query = '') {
   const v   = getVars();
   const q   = query.toLowerCase();
@@ -441,10 +445,16 @@ function renderCmdHub(query = '') {
 
     // Group header (sembunyikan saat ada filter)
     if (!q) {
+      const isCollapsed = !!CMD_GROUP_STATE[group.group];
       const hdr = document.createElement('div');
-      hdr.className = 'cmd-group-header';
-      hdr.textContent = group.group;
+      hdr.className = 'cmd-group-header' + (isCollapsed ? ' collapsed' : '');
+      hdr.innerHTML = `${esc(group.group)}<i class="chev">▾</i>`;
+      hdr.addEventListener('click', () => {
+        CMD_GROUP_STATE[group.group] = !CMD_GROUP_STATE[group.group];
+        renderCmdHub(EL.cmdSearch.value.trim().toLowerCase());
+      });
       EL.cmdList.appendChild(hdr);
+      if (isCollapsed) return; // skip rendering items kalau collapsed
     }
 
     items.forEach(cmd => {
@@ -473,6 +483,79 @@ function renderCmdHub(query = '') {
   }
 }
 
+/* ── HISTORY (localStorage, max 10) ──────────────────────── */
+const HISTORY_KEY = 'unbScriptHistory';
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveHistory(list) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+}
+
+function pushHistory(entry) {
+  const list = loadHistory();
+  // Cegah duplikat berurutan
+  if (list.length && list[0].id === entry.id) return;
+  list.unshift(entry);
+  if (list.length > 10) list.length = 10;
+  saveHistory(list);
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  const box  = document.getElementById('historyBox');
+  const el   = document.getElementById('historyList');
+  const cnt  = document.getElementById('historyCount');
+  if (!list.length) {
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display  = 'block';
+  cnt.textContent    = list.length;
+  el.innerHTML       = '';
+  list.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    row.innerHTML = `
+      <div class="history-item-meta">
+        <div class="history-item-title">${esc(h.title)}</div>
+        <div class="history-item-sub">${esc(h.type)} &nbsp;·&nbsp; ${esc(h.time)}</div>
+      </div>
+      <button class="history-item-btn">Recall</button>`;
+    row.querySelector('.history-item-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      recallHistory(h);
+    });
+    el.appendChild(row);
+  });
+}
+
+function recallHistory(h) {
+  document.getElementById('interfaceOlt').value  = h.interfaceOlt || '';
+  document.getElementById('onuId').value         = h.onuId        || '';
+  document.getElementById('sn').value            = h.sn           || '';
+  document.getElementById('idPelanggan').value   = h.idPelanggan  || '';
+  document.getElementById('namaPelanggan').value = h.namaPelanggan|| '';
+  document.getElementById('pppoeUser').value     = h.pppoeUser    || '';
+  document.getElementById('pppoePass').value     = h.pppoePass    || '';
+  if (h.configType) document.getElementById('configType').value    = h.configType;
+  if (h.paket)      document.getElementById('paketLayanan').value  = h.paket;
+  EL.outputOlt.textContent = h.scriptOlt || '';
+  EL.outputMkt.textContent = h.scriptMkt || '';
+  renderCmdHub();
+  showToast('History berhasil di-recall!');
+}
+
+document.getElementById('btnClearHistory').addEventListener('click', () => {
+  saveHistory([]);
+  renderHistory();
+  showToast('History dihapus!');
+});
+
 /* ── GENERATE SCRIPT ──────────────────────────────────────── */
 function generateScript() {
   if (!validateForm()) {
@@ -485,9 +568,26 @@ function generateScript() {
   const type = EL.configType.value;
   const fn   = TEMPLATES[type];
 
-  EL.outputOlt.textContent = fn(v);
-  EL.outputMkt.textContent =
-    `/ppp secret add name=${v.PU} password=${v.PP} service=pppoe profile="${v.PL}" comment="${v.IDP}-${v.NMP}"`;
+  const scriptOlt = fn(v);
+  const scriptMkt = `/ppp secret add name=${v.PU} password=${v.PP} service=pppoe profile="${v.PL}" comment="${v.IDP}-${v.NMP}"`;
+
+  EL.outputOlt.textContent = scriptOlt;
+  EL.outputMkt.textContent = scriptMkt;
+
+  // Simpan ke history
+  const now = new Date();
+  const timeStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  pushHistory({
+    id:           `${Date.now()}`,
+    title:        `${v.IDP} – ${v.NMP}`,
+    type:         document.getElementById('configType').options[document.getElementById('configType').selectedIndex].text,
+    time:         timeStr,
+    interfaceOlt: v.IF,  onuId:    v.OID, sn:           v.SN,
+    idPelanggan:  v.IDP, namaPelanggan: v.NMP,
+    pppoeUser:    v.PU,  pppoePass: v.PP,
+    configType:   type,  paket:    v.PL,
+    scriptOlt,           scriptMkt,
+  });
 
   renderCmdHub();
   showToast('Script berhasil di-generate!');
@@ -506,14 +606,65 @@ $('copyMkt').addEventListener('click', function () {
   copyToClipboard(txt, this);
 });
 
+/* ── EXPORT SCRIPT KE FILE .TXT ──────────────────────────── */
+function downloadTxt(content, filename) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+$('exportOlt').addEventListener('click', () => {
+  const txt = EL.outputOlt.textContent;
+  if (txt.startsWith('//')) { showToast('Generate script terlebih dahulu!'); return; }
+  const v = getVars();
+  downloadTxt(txt, `OLT_${v.IDP || 'script'}_${v.IF || 'port'}.txt`);
+  showToast('Script OLT berhasil diunduh!');
+});
+
+$('exportMkt').addEventListener('click', () => {
+  const txt = EL.outputMkt.textContent;
+  if (txt.startsWith('//')) { showToast('Generate script terlebih dahulu!'); return; }
+  const v = getVars();
+  downloadTxt(txt, `MKT_${v.IDP || 'secret'}.txt`);
+  showToast('Script Mikrotik berhasil diunduh!');
+});
+
 /* ── FORM SYNC: ID Pelanggan → PPPoE User ─────────────────── */
 EL.idPelanggan.addEventListener('input', function () {
   EL.pppoeUser.value = this.value;
   renderCmdHub();
 });
 
+/* ── MAC ADDRESS AUTO-FORMAT ──────────────────────────────── */
+// Konversi format apapun → Cisco-style: xxxx.xxxx.xxxx
+// Contoh: 8C:DC:02:BC:78:C9 → 8cdc.02bc.78c9
+//         8C-DC-02-BC-78-C9 → 8cdc.02bc.78c9
+//         8CDC02BC78C9      → 8cdc.02bc.78c9
+function formatMac(raw) {
+  // Strip semua pemisah, ambil hanya hex, lowercase
+  const hex = raw.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+  if (hex.length !== 12) return raw; // bukan MAC valid, kembalikan apa adanya
+  return `${hex.slice(0,4)}.${hex.slice(4,8)}.${hex.slice(8,12)}`;
+}
+
+EL.macAddr.addEventListener('input', function () {
+  const formatted = formatMac(this.value);
+  // Hanya ganti jika hasil berbeda dan input sudah cukup panjang (12+ hex char)
+  const hexLen = this.value.replace(/[^0-9a-fA-F]/g, '').length;
+  if (hexLen === 12 && formatted !== this.value) {
+    this.value = formatted;
+  }
+  renderCmdHub();
+});
+
 /* ── AUTO-REFRESH CMD HUB ─────────────────────────────────── */
-['interfaceOlt', 'onuId', 'sn', 'macAddr', 'pppoeUser', 'pppoePass'].forEach(id => {
+['interfaceOlt', 'onuId', 'sn', 'pppoeUser', 'pppoePass'].forEach(id => {
   $(id).addEventListener('input', renderCmdHub);
 });
 
@@ -621,6 +772,18 @@ function extractField(text, ...keys) {
  *   Serial number → sn
  *   Description   → namaPelanggan (dan idPelanggan jika Name kosong)
  */
+/* Peta VLAN → tipe konfigurasi (untuk auto-detect) */
+const VLAN_CONFIG_MAP = {
+  '100':  'v100',
+  '1600': 'v1600',
+  '1501': 'v1501',
+  '602':  'v602',
+  '903':  'v903',
+  '511':  'v511',
+  '105':  'bridge',
+  '1500': 'bridge_bolo',
+};
+
 function parseOnuText(rawInput) {
   const raw    = normalizeText(rawInput);
   const result = {};
@@ -648,6 +811,12 @@ function parseOnuText(rawInput) {
       if (!result.idPelanggan) result.idPelanggan = descRaw.slice(0, sep).trim();
       result.namaPelanggan = descRaw.slice(sep + 3).trim().toUpperCase();
     }
+  }
+
+  // 5. Auto-detect configType dari VLAN (user-vlan XXXX atau vlan XXXX)
+  const vlanM = raw.match(/user[- ]vlan\s+(\d+)/i) || raw.match(/\bvlan\s+(\d+)\b/i);
+  if (vlanM && VLAN_CONFIG_MAP[vlanM[1]]) {
+    result.configType = VLAN_CONFIG_MAP[vlanM[1]];
   }
 
   return result;
@@ -701,7 +870,13 @@ EL.qfSubmit.addEventListener('click', () => {
   setField(EL.namaPelanggan, data.namaPelanggan);
   // jika koneksi tab punya pppoeUser sendiri, pakai itu
   if (data.pppoeUser) { EL.pppoeUser.value = data.pppoeUser; filled++; }
-  setField(EL.pppoePass,     data.pppoePass);
+  setField(EL.pppoePass, data.pppoePass);
+
+  // Auto-set tipe konfigurasi jika terdeteksi dari VLAN
+  if (data.configType) {
+    EL.configType.value = data.configType;
+    filled++;
+  }
 
   renderCmdHub();
   closeModal();
@@ -804,5 +979,68 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'R') { e.preventDefault(); $('btnReset').click(); }
 });
 
+/* ── TOOLS: MIKROTIK SCRIPT GENERATOR ───────────────────── */
+// Sub-tab switching
+document.querySelectorAll('.mkt-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mkt-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const key = btn.dataset.mkt;
+    document.querySelectorAll('.mkt-panel').forEach(p => p.style.display = 'none');
+    document.getElementById('mktPanel' + key.charAt(0).toUpperCase() + key.slice(1)).style.display = 'block';
+  });
+});
+
+function showMktScript(script) {
+  const res = $('mktScriptResult');
+  res.style.display = 'block';
+  $('mktScriptOutput').textContent = script;
+}
+
+$('btnMktQueue').addEventListener('click', () => {
+  const name    = $('mqName').value.trim()    || '{NAMA}';
+  const target  = $('mqTarget').value.trim()  || '{TARGET}';
+  const up      = $('mqUp').value.trim()      || '10M';
+  const down    = $('mqDown').value.trim()    || '10M';
+  const comment = $('mqComment').value.trim() || '';
+  const script = `/queue simple add name="${name}" target=${target} max-limit=${up}/${down}` +
+    (comment ? ` comment="${comment}"` : '');
+  showMktScript(script);
+});
+
+$('btnMktPool').addEventListener('click', () => {
+  const name  = $('mpName').value.trim()  || '{POOL_NAME}';
+  const range = $('mpRange').value.trim() || '{RANGE}';
+  showMktScript(`/ip pool add name="${name}" ranges=${range}`);
+});
+
+$('btnMktStatic').addEventListener('click', () => {
+  const user    = $('msUser').value.trim()    || '{USER}';
+  const ip      = $('msIp').value.trim()      || '{IP}';
+  const profile = $('msProfile').value.trim() || 'default';
+  const comment = $('msComment').value.trim() || '';
+  const script = `/ppp secret set [find name="${user}"] remote-address=${ip} profile="${profile}"` +
+    (comment ? ` comment="${comment}"` : '');
+  showMktScript(script);
+});
+
+$('btnMktNat').addEventListener('click', () => {
+  const chain   = $('mnChain').value;
+  const outIf   = $('mnOutIface').value.trim()  || '{OUT_IFACE}';
+  const srcAddr = $('mnSrcAddr').value.trim();
+  const comment = $('mnComment').value.trim()   || '';
+  let script = `/ip firewall nat add chain=${chain} out-interface="${outIf}" action=masquerade`;
+  if (srcAddr) script += ` src-address=${srcAddr}`;
+  if (comment) script += ` comment="${comment}"`;
+  showMktScript(script);
+});
+
+$('copyMktTool').addEventListener('click', function () {
+  const txt = $('mktScriptOutput').textContent;
+  if (!txt) { showToast('Generate script terlebih dahulu!'); return; }
+  copyToClipboard(txt, this);
+});
+
 /* ── INIT ─────────────────────────────────────────────────── */
 renderCmdHub();
+renderHistory();
