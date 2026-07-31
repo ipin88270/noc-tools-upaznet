@@ -551,7 +551,7 @@ option   { font-weight: 400; color: #1e293b; }
 .qf-modal {
   background: #fff;
   border-radius: 14px;
-  width: 100%; max-width: 500px;
+  width: 100%; max-width: 580px;
   box-shadow: 0 24px 60px rgba(0,0,0,.45);
   overflow: hidden;
   animation: qf-up .2s cubic-bezier(.22,.61,.36,1);
@@ -627,6 +627,90 @@ option   { font-weight: 400; color: #1e293b; }
   background: #fff;
 }
 .qf-textarea::placeholder { color: #94a3b8; }
+
+/* ── TEKS BEBAS PANEL ──────────────────────────────────────── */
+.qf-textarea-bebas { height: 160px; border-color: #6366f1; }
+.qf-textarea-bebas:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+
+.qf-bebas-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 10px; margin-bottom: 10px;
+}
+
+/* Format badge — shown when format is detected live */
+.qf-format-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  white-space: nowrap; flex-shrink: 0;
+  transition: all .2s;
+}
+.qf-format-badge.fmt-csv     { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.qf-format-badge.fmt-table   { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+.qf-format-badge.fmt-chat    { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+.qf-format-badge.fmt-kv      { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+.qf-format-badge.fmt-unknown { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+.qf-format-icon { font-size: 12px; }
+
+/* Format hints row */
+.qf-format-hints {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 10px;
+  background: #f8fafc; border: 1px solid #e8edf3;
+  border-radius: 7px; padding: 8px 10px;
+}
+.qf-hint-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; color: #64748b; font-family: "Cascadia Code","Fira Code","Consolas",monospace;
+}
+.qf-hint-chip {
+  padding: 1px 6px; border-radius: 4px;
+  font-size: 9px; font-weight: 800; letter-spacing: .08em;
+  flex-shrink: 0;
+}
+.qf-chip-csv   { background: #dcfce7; color: #166534; }
+.qf-chip-table { background: #dbeafe; color: #1e40af; }
+.qf-chip-chat  { background: #fef9c3; color: #854d0e; }
+.qf-chip-kv    { background: #f3e8ff; color: #6b21a8; }
+
+/* Preview panel */
+.qf-preview {
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.qf-preview-title {
+  padding: 6px 11px;
+  background: #f1f5f9;
+  font-size: 10px; font-weight: 700;
+  color: #475569; letter-spacing: .08em; text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+}
+.qf-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 8px 10px;
+  background: #fff;
+}
+.qf-preview-row {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 3px 4px;
+}
+.qf-preview-key {
+  font-size: 10px; color: #94a3b8;
+  font-weight: 600; min-width: 90px; flex-shrink: 0;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.qf-preview-val {
+  font-size: 11px; color: #1e293b;
+  font-family: "Cascadia Code","Fira Code","Consolas",monospace;
+  font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.qf-preview-val.empty { color: #cbd5e1; font-weight: 400; font-style: italic; }
+.qf-preview-val.detected { color: #059669; }
 
 .qf-footer {
   padding: 12px 18px 16px;

@@ -554,6 +554,13 @@
     <div class="qf-tabs">
       <button class="qf-tab" id="tabKoneksi">Detail Koneksi</button>
       <button class="qf-tab active" id="tabOnu">Detail ONU</button>
+      <button class="qf-tab" id="tabBebas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Teks Bebas
+      </button>
     </div>
 
     <!-- Panel: Detail Koneksi -->
@@ -583,6 +590,49 @@ Contoh:
 ONU interface:	gpon-onu_1/3/16:10	Config state:	success
 Name:	2010100005	Serial number:	HWTCDF6AE2C8
 Type:	ALL-ONT	Description:	2010100005 - HADI PURWANTO"></textarea>
+    </div>
+
+    <!-- Panel: Teks Bebas (Multi-format) -->
+    <div class="qf-panel" id="panelBebas" style="display:none;">
+      <div class="qf-bebas-header">
+        <p class="qf-desc" style="margin:0;">
+          Paste teks dari <strong>sumber apapun</strong> — Excel/CSV, tabel HTML, chat WhatsApp, atau format billing apapun. Parser akan mendeteksi format secara otomatis.
+        </p>
+        <!-- Format Badge -->
+        <div class="qf-format-badge" id="qfFormatBadge" style="display:none;">
+          <span class="qf-format-icon" id="qfFormatIcon"></span>
+          <span id="qfFormatLabel">—</span>
+        </div>
+      </div>
+
+      <!-- Format Hints -->
+      <div class="qf-format-hints">
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-csv">CSV</span>
+          <span>2010102081,IR. BAMBANG,2010102081,150326,1/4/2,88,HWTC...</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-table">TABLE</span>
+          <span>ID&#9;Nama&#9;User&#9;Pass&#9;Interface&#9;ONUID&#9;SN</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-chat">CHAT</span>
+          <span>*ID:* 2010102081 *Nama:* BAMBANG *SN:* HWTC...</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-kv">KEY:VAL</span>
+          <span>ID=2010102081 | Nama=BAMBANG | SN=HWTCDF67C578</span>
+        </div>
+      </div>
+
+      <textarea class="qf-textarea qf-textarea-bebas" id="pasteBebas"
+        placeholder="Paste teks dari sumber manapun di sini...&#10;&#10;Format yang didukung:&#10;• Excel / CSV  (koma, titik koma, atau tab)&#10;• Tabel HTML   (copy dari browser)&#10;• Chat/WhatsApp (*bold label:* nilai)&#10;• Key=Value    (format billing / export apapun)&#10;• Label : Nilai (format laporan biasa)"></textarea>
+
+      <!-- Preview hasil parsing -->
+      <div class="qf-preview" id="qfPreview" style="display:none;">
+        <div class="qf-preview-title">Preview hasil deteksi:</div>
+        <div class="qf-preview-grid" id="qfPreviewGrid"></div>
+      </div>
     </div>
 
     <!-- Footer -->

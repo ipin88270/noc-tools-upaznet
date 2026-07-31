@@ -719,18 +719,24 @@ document.querySelectorAll('.tab-bar .tab').forEach(btn => {
 function openModal() {
   EL.pasteOnu.value     = '';
   EL.pasteKoneksi.value = '';
+  $('pasteBebas').value = '';
+  hideBebas();
   setTab('onu');
   EL.qfModal.style.display = 'flex';
 }
 function closeModal() {
   EL.qfModal.style.display = 'none';
 }
+function hideBebas() {
+  $('qfFormatBadge').style.display = 'none';
+  $('qfPreview').style.display     = 'none';
+}
 function setTab(tab) {
-  const isOnu = tab === 'onu';
-  EL.tabOnu.classList.toggle('active', isOnu);
-  EL.tabKoneksi.classList.toggle('active', !isOnu);
-  EL.panelOnu.style.display      = isOnu ? 'block' : 'none';
-  EL.panelKoneksi.style.display  = isOnu ? 'none'  : 'block';
+  const tabs = ['onu', 'koneksi', 'bebas'];
+  tabs.forEach(t => {
+    $('tab'  + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+    $('panel'+ t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? 'block' : 'none';
+  });
 }
 
 $('btnQuickFill').addEventListener('click', openModal);
@@ -739,6 +745,7 @@ EL.qfCancel.addEventListener('click', closeModal);
 EL.qfModal.addEventListener('click', (e) => { if (e.target === EL.qfModal) closeModal(); });
 EL.tabOnu.addEventListener('click',      () => setTab('onu'));
 EL.tabKoneksi.addEventListener('click',  () => setTab('koneksi'));
+$('tabBebas').addEventListener('click',  () => setTab('bebas'));
 
 /* ── PARSER ───────────────────────────────────────────────── */
 /**
@@ -845,16 +852,403 @@ function parseKoneksiText(rawInput) {
   return result;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   MULTI-FORMAT PARSER ENGINE (Teks Bebas)
+   Mendukung: CSV/Excel, Tabel HTML (tab-sep), Chat/WA, Key-Value
+═══════════════════════════════════════════════════════════ */
+
+/**
+ * Daftar alias per field — kunci yang akan dicari dari teks bebas.
+ * Urutan: paling spesifik dulu.
+ */
+const FIELD_ALIASES = {
+  idPelanggan:   ['id pelanggan', 'id', 'customer id', 'no pelanggan', 'nomor pelanggan', 'cust id', 'custid'],
+  namaPelanggan: ['nama pelanggan', 'nama', 'name', 'customer name', 'pelanggan'],
+  interfaceOlt:  ['interface olt', 'interface', 'port olt', 'olt port', 'olt interface', 'port', 'gpon port'],
+  onuId:         ['onu id', 'onuid', 'onu', 'ont id', 'ont'],
+  sn:            ['serial number', 'serial', 'sn', 's/n', 'serial no', 'no seri'],
+  pppoeUser:     ['pppoe user', 'pppoe username', 'username', 'user pppoe', 'user', 'login'],
+  pppoePass:     ['pppoe pass', 'pppoe password', 'password', 'pass', 'passwd', 'sandi'],
+  paket:         ['paket layanan', 'paket', 'service', 'profile', 'layanan', 'bandwidth'],
+};
+
+/**
+ * detectFormat(text) → 'csv' | 'table' | 'chat' | 'kv' | 'unknown'
+ *
+ * Heuristik:
+ *  csv   — baris berisi ≥3 token yang dipisah koma atau titik koma (tanpa banyak ':')
+ *  table — baris pertama berisi TAB dan ≥3 kolom (copy dari browser)
+ *  chat  — ada pola *bold:* atau **bold:** (WhatsApp / Telegram markdown)
+ *  kv    — ada pola key=value atau key: value berulang
+ */
+function detectFormat(text) {
+  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return 'unknown';
+
+  // Chat/WA: *Label:* atau **Label:**
+  const chatScore = lines.filter(l => /\*{1,2}[^*]+\*{1,2}\s*:?/.test(l)).length;
+  if (chatScore >= 1) return 'chat';
+
+  // CSV: baris mengandung ≥3 koma atau ≥3 titik koma
+  const csvComma = lines.filter(l => (l.match(/,/g) || []).length >= 2).length;
+  const csvSemi  = lines.filter(l => (l.match(/;/g) || []).length >= 2).length;
+  if (csvComma >= 1 || csvSemi >= 1) return 'csv';
+
+  // Table (tab-separated): baris dengan ≥2 TAB
+  const tabScore = lines.filter(l => (l.match(/\t/g) || []).length >= 2).length;
+  if (tabScore >= 1) return 'table';
+
+  // KV: key: value atau key = value atau key | value
+  const kvScore = lines.filter(l => /^[^:=|]+[:=|]\s*.+/.test(l)).length;
+  if (kvScore >= lines.length * 0.4) return 'kv';
+
+  return 'unknown';
+}
+
+/**
+ * Normalisasi header label ke slug untuk pencocokan alias.
+ */
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Cari nama field dari label mentah menggunakan FIELD_ALIASES.
+ * Kembalikan nama field (key di FIELD_ALIASES) atau null.
+ */
+function matchAlias(label) {
+  const slug = slugify(label);
+  for (const [field, aliases] of Object.entries(FIELD_ALIASES)) {
+    if (aliases.some(a => slug === a || slug.includes(a) || a.includes(slug))) {
+      return field;
+    }
+  }
+  return null;
+}
+
+/**
+ * Sanitize nilai field berdasarkan jenis field yang diharapkan.
+ */
+function sanitizeValue(field, raw) {
+  const v = raw.trim().replace(/^["']|["']$/g, ''); // strip kutip
+  if (!v || v === '-' || v === 'null' || v === 'N/A') return '';
+  switch (field) {
+    case 'idPelanggan':
+    case 'pppoeUser':   return v.split(/\s/)[0];
+    case 'pppoePass':   return v.split(/\s/)[0];
+    case 'sn':          return v.split(/\s/)[0].replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    case 'namaPelanggan': return v.replace(/[^A-Za-z0-9 .,'\/\-]/g, '').trim().toUpperCase();
+    case 'interfaceOlt': {
+      // Bisa berupa "gpon-olt_1/4/2" atau "1/4/2" atau "1-4-2"
+      const m = v.match(/(\d+)[\/\-](\d+)[\/\-](\d+)/);
+      return m ? `${m[1]}/${m[2]}/${m[3]}` : v;
+    }
+    case 'onuId':       return v.replace(/\D/g, '') || v;
+    default:            return v;
+  }
+}
+
+/* ── CSV PARSER ────────────────────────────────────────────── */
+/**
+ * Mendukung:
+ *  - Header baris pertama (nama kolom) + data rows
+ *  - Delimiter: koma, titik koma
+ *  - Nilai bisa dalam "kutip"
+ *  - Jika tidak ada header yang cocok, coba deteksi posisi kolom dari urutan umum
+ */
+function parseCsvText(raw) {
+  const result = {};
+  const lines  = raw.split(/\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return result;
+
+  const sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+  const splitCsv = (line) => {
+    const cols = []; let cur = ''; let inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === sep && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur.trim());
+    return cols;
+  };
+
+  const headers = splitCsv(lines[0]).map(h => h.replace(/^["']|["']$/g, ''));
+
+  // Cek apakah baris pertama adalah header (berisi teks, bukan angka murni)
+  const isHeaderRow = headers.some(h => /[a-zA-Z]/.test(h));
+
+  if (isHeaderRow && lines.length >= 2) {
+    // Mode: header → data (ambil baris data pertama)
+    const values = splitCsv(lines[1]);
+    headers.forEach((h, i) => {
+      const field = matchAlias(h);
+      if (field && values[i] !== undefined) {
+        const v = sanitizeValue(field, values[i]);
+        if (v) result[field] = v;
+      }
+    });
+  } else {
+    // Mode: data saja, coba positional mapping (urutan umum)
+    const POSITIONAL = ['idPelanggan', 'namaPelanggan', 'pppoeUser', 'pppoePass',
+                        'interfaceOlt', 'onuId', 'sn'];
+    const values = splitCsv(lines[0]);
+    values.forEach((v, i) => {
+      if (i < POSITIONAL.length) {
+        const sv = sanitizeValue(POSITIONAL[i], v);
+        if (sv) result[POSITIONAL[i]] = sv;
+      }
+    });
+  }
+  return result;
+}
+
+/* ── TABLE PARSER (tab-separated, copy dari browser) ──────── */
+/**
+ * Mendukung:
+ *  - Baris pertama = header kolom (tab-separated)
+ *  - Baris kedua dst = data
+ *  - Jika header tidak cocok, pakai positional mapping
+ */
+function parseTableText(raw) {
+  const result = {};
+  const lines  = raw.split(/\n/).map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return result;
+
+  const headers = lines[0].split(/\t/).map(h => h.trim());
+  const isHeaderRow = headers.some(h => /[a-zA-Z]/.test(h));
+
+  if (isHeaderRow && lines.length >= 2) {
+    const values = lines[1].split(/\t/).map(v => v.trim());
+    headers.forEach((h, i) => {
+      const field = matchAlias(h);
+      if (field && values[i] !== undefined) {
+        const v = sanitizeValue(field, values[i]);
+        if (v) result[field] = v;
+      }
+    });
+  } else {
+    // Satu baris saja, coba positional
+    const POSITIONAL = ['idPelanggan', 'namaPelanggan', 'pppoeUser', 'pppoePass',
+                        'interfaceOlt', 'onuId', 'sn'];
+    const values = lines[0].split(/\t/).map(v => v.trim());
+    values.forEach((v, i) => {
+      if (i < POSITIONAL.length) {
+        const sv = sanitizeValue(POSITIONAL[i], v);
+        if (sv) result[POSITIONAL[i]] = sv;
+      }
+    });
+  }
+  return result;
+}
+
+/* ── CHAT / WHATSAPP PARSER ───────────────────────────────── */
+/**
+ * Mendukung pola:
+ *  - *Label:* nilai           (WhatsApp bold)
+ *  - **Label:** nilai         (Telegram/Markdown bold)
+ *  - Label: nilai             (polos)
+ *  - Label : nilai            (spasi sebelum titik dua)
+ *  - Label = nilai            (sama saja)
+ *  - Semua dalam satu baris atau multi-baris
+ *  - Nilai bisa dilanjut sampai label berikutnya atau akhir baris
+ */
+function parseChatText(raw) {
+  const result = {};
+
+  // Normalisasi: strip markdown bold dari label (*label* atau **label**)
+  // Ubah jadi format "Label: Nilai"
+  const cleaned = raw
+    .replace(/\*{1,2}([^*]+)\*{1,2}\s*:?\s*/g, '$1: ')  // *Label:* → Label:
+    .replace(/\n{2,}/g, '\n')                              // double newline → single
+    .trim();
+
+  // Split per baris, lalu per pola key: value
+  const lines = cleaned.split(/\n/);
+  lines.forEach(line => {
+    // Coba split pada ':' atau '=' atau '|'
+    const m = line.match(/^(.+?)\s*[:=|]\s*(.+)$/);
+    if (!m) return;
+    const label = m[1].trim();
+    const value = m[2].trim();
+    const field = matchAlias(label);
+    if (field) {
+      const v = sanitizeValue(field, value);
+      if (v) result[field] = v;
+    }
+  });
+
+  // Fallback: cari SN dan interface dengan regex langsung di raw
+  if (!result.sn) {
+    const snM = raw.match(/\b([A-Z]{4}[A-Z0-9]{8,})\b/);
+    if (snM) result.sn = snM[1].toUpperCase();
+  }
+  if (!result.interfaceOlt) {
+    const ifM = raw.match(/\b(\d+\/\d+\/\d+)\b/);
+    if (ifM) result.interfaceOlt = ifM[1];
+  }
+  if (!result.onuId && result.interfaceOlt) {
+    const oidM = raw.match(/gpon[_-]onu[_-]\d+\/\d+\/\d+:(\d+)/i);
+    if (oidM) result.onuId = oidM[1];
+  }
+
+  return result;
+}
+
+/* ── KEY-VALUE PARSER (format bebas / billing) ────────────── */
+/**
+ * Paling fleksibel — mendukung:
+ *  - key: value
+ *  - key = value
+ *  - key | value
+ *  - key - value  (hanya jika setelah spasi)
+ *  - Multi-baris dan inline dalam satu baris
+ */
+function parseKvText(raw) {
+  const result = {};
+  const norm   = normalizeText(raw); // tab → newline
+
+  // Kumpulkan semua pasangan key-value dari seluruh teks
+  // Pattern: sesuatu diikuti pemisah : = | lalu nilai sampai newline atau pemisah berikutnya
+  const re = /([A-Za-z][A-Za-z0-9 _\/]*?)\s*[:=|]\s*([^\n:=|]{1,80})/g;
+  let m;
+  while ((m = re.exec(norm)) !== null) {
+    const label = m[1].trim();
+    const value = m[2].trim();
+    if (!label || !value) continue;
+    const field = matchAlias(label);
+    if (field && !result[field]) {
+      const v = sanitizeValue(field, value);
+      if (v) result[field] = v;
+    }
+  }
+
+  // Regex fallback untuk pola spesifik
+  if (!result.sn) {
+    const snM = raw.match(/\b([A-Z]{4}[A-Z0-9]{8,12})\b/);
+    if (snM) result.sn = snM[1].toUpperCase();
+  }
+  if (!result.interfaceOlt) {
+    const ifM = raw.match(/\b(\d+\/\d+\/\d+)\b/);
+    if (ifM) result.interfaceOlt = ifM[1];
+  }
+  if (!result.onuId) {
+    const oidM = raw.match(/gpon[_-]onu[_-]\d+\/\d+\/\d+:(\d+)/i);
+    if (oidM) result.onuId = oidM[1];
+  }
+
+  return result;
+}
+
+/**
+ * Master parser — jalankan semua parser berdasarkan format terdeteksi
+ * dan gabungkan hasilnya (format spesifik menang atas fallback).
+ */
+function parseBebasText(raw) {
+  const fmt = detectFormat(raw);
+  let result = {};
+
+  switch (fmt) {
+    case 'csv':   result = parseCsvText(raw);   break;
+    case 'table': result = parseTableText(raw); break;
+    case 'chat':  result = parseChatText(raw);  break;
+    default:      result = parseKvText(raw);    break; // 'kv' dan 'unknown'
+  }
+
+  // Selalu jalankan KV sebagai fallback tambahan (isi field yang masih kosong)
+  if (fmt !== 'kv') {
+    const kv = parseKvText(raw);
+    for (const [k, v] of Object.entries(kv)) {
+      if (!result[k] && v) result[k] = v;
+    }
+  }
+
+  // VLAN auto-detect (sama seperti parseOnuText)
+  if (!result.configType) {
+    const vlanM = raw.match(/user[- ]vlan\s+(\d+)/i) || raw.match(/\bvlan[_\s]+(\d+)\b/i);
+    if (vlanM && VLAN_CONFIG_MAP[vlanM[1]]) result.configType = VLAN_CONFIG_MAP[vlanM[1]];
+  }
+
+  result._format = fmt;
+  return result;
+}
+
+/* ── LIVE PREVIEW saat user mengetik di Teks Bebas ─────────── */
+const FORMAT_META = {
+  csv:     { label: 'CSV / Excel',       cls: 'fmt-csv',     icon: '📊' },
+  table:   { label: 'Tabel (HTML/TSV)',  cls: 'fmt-table',   icon: '📋' },
+  chat:    { label: 'Chat / WhatsApp',   cls: 'fmt-chat',    icon: '💬' },
+  kv:      { label: 'Key-Value',         cls: 'fmt-kv',      icon: '🔑' },
+  unknown: { label: 'Belum Terdeteksi',  cls: 'fmt-unknown', icon: '❓' },
+};
+
+const FIELD_LABELS = {
+  idPelanggan:   'ID Pelanggan',
+  namaPelanggan: 'Nama',
+  interfaceOlt:  'Interface OLT',
+  onuId:         'ONU ID',
+  sn:            'Serial Number',
+  pppoeUser:     'PPPoE User',
+  pppoePass:     'PPPoE Pass',
+  paket:         'Paket Layanan',
+  configType:    'Config Type',
+};
+
+let _bebasDebounce = null;
+$('pasteBebas').addEventListener('input', function () {
+  clearTimeout(_bebasDebounce);
+  _bebasDebounce = setTimeout(() => {
+    const raw = this.value.trim();
+    if (!raw) { hideBebas(); return; }
+
+    const data   = parseBebasText(raw);
+    const fmt    = data._format || 'unknown';
+    const meta   = FORMAT_META[fmt] || FORMAT_META.unknown;
+    const badge  = $('qfFormatBadge');
+    const label  = $('qfFormatLabel');
+    const icon   = $('qfFormatIcon');
+
+    // Update badge
+    badge.className    = 'qf-format-badge ' + meta.cls;
+    badge.style.display= 'flex';
+    label.textContent  = meta.label;
+    icon.textContent   = meta.icon;
+
+    // Build preview grid
+    const grid = $('qfPreviewGrid');
+    grid.innerHTML = '';
+    Object.entries(FIELD_LABELS).forEach(([field, lbl]) => {
+      const val = data[field];
+      const row = document.createElement('div');
+      row.className = 'qf-preview-row';
+      row.innerHTML = `
+        <span class="qf-preview-key">${lbl}</span>
+        <span class="qf-preview-val${val ? ' detected' : ' empty'}">${val ? esc(val) : '—'}</span>`;
+      grid.appendChild(row);
+    });
+    $('qfPreview').style.display = 'block';
+  }, 280); // debounce 280ms
+});
+
 /* ── MODAL SUBMIT ─────────────────────────────────────────── */
 EL.qfSubmit.addEventListener('click', () => {
-  const isOnu   = EL.tabOnu.classList.contains('active');
-  const rawText = (isOnu ? EL.pasteOnu.value : EL.pasteKoneksi.value).trim();
+  const activeTab = ['onu','koneksi','bebas'].find(t =>
+    $('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.contains('active')
+  );
+  const rawText = (
+    activeTab === 'onu'     ? EL.pasteOnu.value     :
+    activeTab === 'koneksi' ? EL.pasteKoneksi.value :
+                              $('pasteBebas').value
+  ).trim();
 
   if (!rawText) { showToast('Teks belum di-paste!'); return; }
 
-  const data   = isOnu ? parseOnuText(rawText) : parseKoneksiText(rawText);
-  let   filled = 0;
+  let data;
+  if      (activeTab === 'onu')     data = parseOnuText(rawText);
+  else if (activeTab === 'koneksi') data = parseKoneksiText(rawText);
+  else                               data = parseBebasText(rawText);
 
+  let filled = 0;
   const setField = (el, val) => { if (val) { el.value = val; filled++; } };
 
   setField(EL.interfaceOlt,  data.interfaceOlt);
@@ -863,25 +1257,32 @@ EL.qfSubmit.addEventListener('click', () => {
 
   if (data.idPelanggan) {
     EL.idPelanggan.value = data.idPelanggan;
-    EL.pppoeUser.value   = data.idPelanggan; // sync PPPoE User
+    EL.pppoeUser.value   = data.idPelanggan;
     filled++;
   }
 
   setField(EL.namaPelanggan, data.namaPelanggan);
-  // jika koneksi tab punya pppoeUser sendiri, pakai itu
   if (data.pppoeUser) { EL.pppoeUser.value = data.pppoeUser; filled++; }
   setField(EL.pppoePass, data.pppoePass);
 
-  // Auto-set tipe konfigurasi jika terdeteksi dari VLAN
-  if (data.configType) {
-    EL.configType.value = data.configType;
-    filled++;
+  if (data.configType) { EL.configType.value = data.configType; filled++; }
+  if (data.paket) {
+    // Coba cocokkan dengan opsi paket yang ada
+    const opts = [...EL.paketLayanan.options].map(o => o.value.toLowerCase());
+    const match = opts.findIndex(o => o.includes(data.paket.toLowerCase()) ||
+                                      data.paket.toLowerCase().includes(o));
+    if (match >= 0) { EL.paketLayanan.selectedIndex = match; filled++; }
   }
 
   renderCmdHub();
   closeModal();
 
-  showToast(filled ? `${filled} field berhasil diisi otomatis!` : 'Data tidak dikenali — periksa format teks.');
+  const fmtInfo = activeTab === 'bebas' && data._format
+    ? ` (${FORMAT_META[data._format]?.label || data._format})`
+    : '';
+  showToast(filled
+    ? `${filled} field berhasil diisi otomatis!${fmtInfo}`
+    : 'Data tidak dikenali — periksa format teks.');
 });
 
 /* ── TOOLS: KALKULATOR REDAMAN FO ────────────────────────── */
