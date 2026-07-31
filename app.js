@@ -541,18 +541,26 @@ EL.cmdSearch.addEventListener('input', function () {
 });
 
 /* ── TAB SWITCHING ────────────────────────────────────────── */
-const mainGrid  = document.querySelector('.main-grid');
-const panelFtth  = $('panelFtth');
-const panelTools = $('panelTools');
+const TAB_PANELS = {
+  unb:   $('panelUnb'),
+  ftth:  $('panelFtth'),
+  tools: $('panelTools'),
+};
 
 document.querySelectorAll('.tab-bar .tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     const tab = btn.dataset.tab;
-    mainGrid.style.display   = tab === 'unb'   ? 'grid' : 'none';
-    panelFtth.style.display  = tab === 'ftth'  ? 'block': 'none';
-    panelTools.style.display = tab === 'tools' ? 'block': 'none';
+    // Tampilkan panel yang sesuai, sembunyikan yang lain
+    Object.entries(TAB_PANELS).forEach(([key, el]) => {
+      if (!el) return;
+      if (key === 'unb') {
+        el.style.display = tab === 'unb' ? 'grid' : 'none';
+      } else {
+        el.style.display = tab === key ? 'block' : 'none';
+      }
+    });
   });
 });
 

@@ -35,23 +35,33 @@
 </header>
 
 <!-- ════════════════════════════════════
-     MAIN GRID (3 KOLOM)
+     TAB UNB — MAIN GRID (3 KOLOM)
 ════════════════════════════════════ -->
-<div class="main-grid">
+<div class="main-grid" id="panelUnb">
 
   <!-- ═══ KOLOM KIRI: FORM INPUT ═══ -->
   <div class="card">
     <div class="card-header">Form Input</div>
     <div class="card-body">
 
-      <!-- Quick Fill -->
-      <button class="btn-quick-fill" id="btnQuickFill">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-        </svg>
-        Quick Fill dari Detail ONU
-      </button>
+      <!-- Quick Fill + Reset -->
+      <div class="form-action-row">
+        <button class="btn-quick-fill" id="btnQuickFill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          Quick Fill
+        </button>
+        <button class="btn-reset" id="btnReset" title="Reset semua field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset
+        </button>
+      </div>
 
       <!-- Tipe Konfigurasi -->
       <div class="form-group">
@@ -86,15 +96,28 @@
         </div>
       </div>
 
-      <!-- Serial Number -->
-      <div class="form-group">
-        <label class="form-label" for="sn">Serial Number (SN)</label>
-        <input class="form-control" id="sn" type="text"
-               placeholder="e.g. HWTCDF67C578" autocomplete="off"
-               style="text-transform:uppercase;"/>
+      <!-- Hint Interface Format -->
+      <div class="field-hint" id="hintInterface" style="display:none;">
+        Format: angka/angka/angka &nbsp;(contoh: 1/4/2)
       </div>
 
-      <!-- Section Header -->
+      <!-- Serial Number + MAC Address -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="sn">Serial Number (SN)</label>
+          <input class="form-control" id="sn" type="text"
+                 placeholder="e.g. HWTCDF67C578" autocomplete="off"
+                 style="text-transform:uppercase;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="macAddr">MAC Address</label>
+          <input class="form-control" id="macAddr" type="text"
+                 placeholder="e.g. c4eb.ff21.c531" autocomplete="off"
+                 style="text-transform:lowercase;"/>
+        </div>
+      </div>
+
+      <!-- Section Header: PPPoE -->
       <div class="form-section-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -142,6 +165,9 @@
                  placeholder="e.g. 150326" autocomplete="off"/>
         </div>
       </div>
+
+      <!-- Validation Message -->
+      <div id="validationMsg" class="validation-msg" style="display:none;"></div>
 
       <!-- Generate Button -->
       <button class="btn-generate" id="btnGenerate">
@@ -210,7 +236,8 @@
     <div class="cmd-search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       <input type="text" id="cmdSearch" class="cmd-search" placeholder="Cari command..."/>
     </div>
@@ -219,10 +246,10 @@
     </div>
   </div><!-- /KOLOM KANAN -->
 
-</div><!-- /MAIN GRID -->
+</div><!-- /TAB UNB -->
 
 <!-- ════════════════════════════════════
-     TAB PANEL: FTTH (placeholder)
+     TAB PANEL: FTTH
 ════════════════════════════════════ -->
 <div id="panelFtth" class="tab-panel" style="display:none;">
   <div class="tab-empty">
@@ -285,7 +312,8 @@
         <button class="btn-generate" id="btnCalcFO" style="margin-top:10px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
           Hitung Redaman
         </button>
@@ -315,7 +343,8 @@
         <button class="btn-generate" id="btnCalcSubnet" style="margin-top:6px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
           Hitung Subnet
         </button>
@@ -324,7 +353,7 @@
     </div>
 
   </div>
-</div>
+</div><!-- /TAB TOOLS -->
 
 <!-- ════════════════════════════════════
      MODAL QUICK FILL
