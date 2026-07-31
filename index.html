@@ -28,9 +28,9 @@
     </div>
   </div>
   <div class="tab-bar">
-    <button class="tab active">UNB</button>
-    <button class="tab">FTTH</button>
-    <button class="tab">TOOLS</button>
+    <button class="tab active" data-tab="unb">UNB</button>
+    <button class="tab" data-tab="ftth">FTTH</button>
+    <button class="tab" data-tab="tools">TOOLS</button>
   </div>
 </header>
 
@@ -206,12 +206,125 @@
       <div class="cmd-hub-title">&gt; COMMAND HUB</div>
       <div class="badge-toggle">C300/C320</div>
     </div>
+    <!-- Search Command Hub -->
+    <div class="cmd-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="cmdSearch" class="cmd-search" placeholder="Cari command..."/>
+    </div>
     <div class="cmd-list" id="cmdList">
       <!-- Populated by app.js -->
     </div>
   </div><!-- /KOLOM KANAN -->
 
 </div><!-- /MAIN GRID -->
+
+<!-- ════════════════════════════════════
+     TAB PANEL: FTTH (placeholder)
+════════════════════════════════════ -->
+<div id="panelFtth" class="tab-panel" style="display:none;">
+  <div class="tab-empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <path d="M8 21h8M12 17v4"/>
+    </svg>
+    <div class="tab-empty-title">FTTH Script Generator</div>
+    <div class="tab-empty-sub">Modul untuk Huawei MA5800 / ZTE C600.<br/>Segera hadir di update berikutnya.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB PANEL: TOOLS
+════════════════════════════════════ -->
+<div id="panelTools" class="tab-panel" style="display:none;">
+  <div class="tools-grid">
+
+    <!-- TOOL 1: Kalkulator Redaman FO -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Kalkulator Redaman FO
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Estimasi total redaman dan Rx Power ONT berdasarkan parameter kabel fiber optik.</p>
+        <div class="tool-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="foLength">Panjang Kabel (km)</label>
+            <input class="form-control" id="foLength" type="number" step="0.1" min="0" placeholder="e.g. 2.5"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foSplice">Jumlah Splice</label>
+            <input class="form-control" id="foSplice" type="number" min="0" placeholder="e.g. 4"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foKonektor">Jumlah Konektor</label>
+            <input class="form-control" id="foKonektor" type="number" min="0" placeholder="e.g. 2"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foSplitter">Splitter (dB)</label>
+            <select class="form-control" id="foSplitter">
+              <option value="3.5">1:2 (~3.5 dB)</option>
+              <option value="7.0">1:4 (~7.0 dB)</option>
+              <option value="10.5" selected>1:8 (~10.5 dB)</option>
+              <option value="13.5">1:16 (~13.5 dB)</option>
+              <option value="16.5">1:32 (~16.5 dB)</option>
+              <option value="19.5">1:64 (~19.5 dB)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foTxPower">Tx Power OLT (dBm)</label>
+            <input class="form-control" id="foTxPower" type="number" step="0.1" value="4" placeholder="e.g. 4"/>
+          </div>
+        </div>
+        <button class="btn-generate" id="btnCalcFO" style="margin-top:10px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Hitung Redaman
+        </button>
+        <div id="foResult" class="fo-result" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 2: Konverter Subnet / CIDR -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="9" height="9" rx="1"/>
+          <rect x="13" y="2" width="9" height="9" rx="1"/>
+          <rect x="2" y="13" width="9" height="9" rx="1"/>
+          <path d="M17 17h4m-2-2v4"/>
+        </svg>
+        Konverter Subnet / CIDR
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Hitung Network, Broadcast, Range IP, dan jumlah host dari CIDR notation.</p>
+        <div class="form-group">
+          <label class="form-label" for="subnetInput">IP Address / CIDR</label>
+          <input class="form-control" id="subnetInput" type="text"
+                 placeholder="e.g. 192.168.10.0/24" autocomplete="off"/>
+        </div>
+        <button class="btn-generate" id="btnCalcSubnet" style="margin-top:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Hitung Subnet
+        </button>
+        <div id="subnetResult" class="subnet-result" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- ════════════════════════════════════
      MODAL QUICK FILL

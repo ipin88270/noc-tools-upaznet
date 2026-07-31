@@ -292,6 +292,7 @@ const EL = {
   interfaceOlt:  $('interfaceOlt'),
   onuId:         $('onuId'),
   sn:            $('sn'),
+  macAddr:       $('macAddr'),
   idPelanggan:   $('idPelanggan'),
   namaPelanggan: $('namaPelanggan'),
   paketLayanan:  $('paketLayanan'),
@@ -300,7 +301,10 @@ const EL = {
   outputOlt:     $('outputOlt'),
   outputMkt:     $('outputMkt'),
   cmdList:       $('cmdList'),
+  cmdSearch:     $('cmdSearch'),
   toastContainer:$('toast-container'),
+  validationMsg: $('validationMsg'),
+  hintInterface: $('hintInterface'),
   // modal
   qfModal:       $('qfModal'),
   qfClose:       $('qfClose'),
@@ -317,17 +321,70 @@ const EL = {
 /* ── HELPERS ──────────────────────────────────────────────── */
 function getVars() {
   return {
-    IF:  EL.interfaceOlt.value.trim()                     || '{INTERFACE_OLT}',
-    OID: EL.onuId.value.trim()                            || '{ONU_ID}',
-    SN:  EL.sn.value.trim().toUpperCase()                 || '{SN}',
-    IDP: EL.idPelanggan.value.trim()                      || '{ID_PELANGGAN}',
-    NMP: EL.namaPelanggan.value.trim().toUpperCase()      || '{NAMA_PELANGGAN}',
+    IF:  EL.interfaceOlt.value.trim()                || '{INTERFACE_OLT}',
+    OID: EL.onuId.value.trim()                       || '{ONU_ID}',
+    SN:  EL.sn.value.trim().toUpperCase()            || '{SN}',
+    IDP: EL.idPelanggan.value.trim()                 || '{ID_PELANGGAN}',
+    NMP: EL.namaPelanggan.value.trim().toUpperCase() || '{NAMA_PELANGGAN}',
     PL:  EL.paketLayanan.value,
-    PU:  EL.pppoeUser.value.trim()                        || '{PPPOE_USER}',
-    PP:  EL.pppoePass.value.trim()                        || '{PPPOE_PASS}',
-    MAC: EL.macAddr ? EL.macAddr.value.trim()             || '{MAC}' : '{MAC}',
+    PU:  EL.pppoeUser.value.trim()                   || '{PPPOE_USER}',
+    PP:  EL.pppoePass.value.trim()                   || '{PPPOE_PASS}',
+    MAC: EL.macAddr.value.trim()                     || '{MAC}',
   };
 }
+
+/* ── VALIDASI FORM ────────────────────────────────────────── */
+const REQUIRED_FIELDS = [
+  { el: () => EL.interfaceOlt,  label: 'Interface OLT',   pattern: /^\d+\/\d+\/\d+$/ },
+  { el: () => EL.onuId,         label: 'ONU ID',          pattern: /^\d+$/ },
+  { el: () => EL.sn,            label: 'Serial Number',   pattern: /^[A-Za-z0-9]{8,}$/ },
+  { el: () => EL.idPelanggan,   label: 'ID Pelanggan',    pattern: null },
+  { el: () => EL.namaPelanggan, label: 'Nama Pelanggan',  pattern: null },
+  { el: () => EL.pppoeUser,     label: 'PPPoE User',      pattern: null },
+  { el: () => EL.pppoePass,     label: 'PPPoE Pass',      pattern: null },
+];
+
+function validateForm() {
+  const errors = [];
+  // clear previous state
+  REQUIRED_FIELDS.forEach(f => f.el().classList.remove('invalid'));
+  EL.validationMsg.style.display = 'none';
+
+  REQUIRED_FIELDS.forEach(f => {
+    const el  = f.el();
+    const val = el.value.trim();
+    if (!val) {
+      errors.push(`<b>${f.label}</b> wajib diisi`);
+      el.classList.add('invalid');
+    } else if (f.pattern && !f.pattern.test(val)) {
+      if (f.label === 'Interface OLT') {
+        EL.hintInterface.style.display = 'block';
+      }
+      errors.push(`<b>${f.label}</b> format tidak valid`);
+      el.classList.add('invalid');
+    }
+  });
+
+  if (errors.length) {
+    EL.validationMsg.innerHTML = '⚠ ' + errors.join(' &nbsp;·&nbsp; ');
+    EL.validationMsg.style.display = 'block';
+    return false;
+  }
+  EL.hintInterface.style.display = 'none';
+  return true;
+}
+
+// Hapus state invalid saat user mulai mengetik
+REQUIRED_FIELDS.forEach(f => {
+  f.el().addEventListener('input', () => {
+    f.el().classList.remove('invalid');
+    // sembunyikan hint jika interface sudah benar
+    if (f.label === 'Interface OLT' && /^\d+\/\d+\/\d+$/.test(f.el().value.trim())) {
+      EL.hintInterface.style.display = 'none';
+    }
+    EL.validationMsg.style.display = 'none';
+  });
+});
 
 function showToast(msg) {
   const t = document.createElement('div');
@@ -366,19 +423,31 @@ function esc(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function renderCmdHub() {
-  const v = getVars();
+function renderCmdHub(query = '') {
+  const v   = getVars();
+  const q   = query.toLowerCase();
   EL.cmdList.innerHTML = '';
+  let totalVisible = 0;
 
   CMD_DEFS.forEach(group => {
-    // Group header
-    const hdr = document.createElement('div');
-    hdr.className = 'cmd-group-header';
-    hdr.textContent = group.group;
-    EL.cmdList.appendChild(hdr);
+    // Filter items berdasarkan query
+    const items = q
+      ? group.items.filter(cmd =>
+          cmd.label.toLowerCase().includes(q) ||
+          cmd.fn(v).toLowerCase().includes(q))
+      : group.items;
 
-    // Items
-    group.items.forEach(cmd => {
+    if (!items.length) return; // skip grup kosong saat filter aktif
+
+    // Group header (sembunyikan saat ada filter)
+    if (!q) {
+      const hdr = document.createElement('div');
+      hdr.className = 'cmd-group-header';
+      hdr.textContent = group.group;
+      EL.cmdList.appendChild(hdr);
+    }
+
+    items.forEach(cmd => {
       const text = cmd.fn(v);
       const card = document.createElement('div');
       card.className = 'cmd-card';
@@ -391,20 +460,30 @@ function renderCmdHub() {
         setTimeout(() => card.classList.remove('flash-copied'), 700);
       });
       EL.cmdList.appendChild(card);
-    }); // end group.items
-  }); // end CMD_DEFS
+      totalVisible++;
+    });
+  });
+
+  // Tampilkan pesan jika tidak ada hasil
+  if (q && totalVisible === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'cmd-no-results';
+    msg.textContent = `Tidak ada command yang cocok dengan "${query}"`;
+    EL.cmdList.appendChild(msg);
+  }
 }
 
 /* ── GENERATE SCRIPT ──────────────────────────────────────── */
 function generateScript() {
+  if (!validateForm()) {
+    // scroll form ke atas agar error terlihat
+    EL.validationMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
   const v    = getVars();
   const type = EL.configType.value;
   const fn   = TEMPLATES[type];
-
-  if (!fn) {
-    showToast('Template tidak ditemukan!');
-    return;
-  }
 
   EL.outputOlt.textContent = fn(v);
   EL.outputMkt.textContent =
@@ -434,11 +513,48 @@ EL.idPelanggan.addEventListener('input', function () {
 });
 
 /* ── AUTO-REFRESH CMD HUB ─────────────────────────────────── */
-['interfaceOlt', 'onuId', 'sn', 'pppoeUser', 'pppoePass'].forEach(id => {
+['interfaceOlt', 'onuId', 'sn', 'macAddr', 'pppoeUser', 'pppoePass'].forEach(id => {
   $(id).addEventListener('input', renderCmdHub);
 });
 
 $('btnGenerate').addEventListener('click', generateScript);
+
+/* ── RESET FORM ───────────────────────────────────────────── */
+$('btnReset').addEventListener('click', () => {
+  ['interfaceOlt','onuId','sn','macAddr','idPelanggan',
+   'namaPelanggan','pppoeUser','pppoePass'].forEach(id => $(id).value = '');
+  EL.configType.value    = 'v100';
+  EL.paketLayanan.value  = 'KUSUMA 1';
+  EL.outputOlt.innerHTML = '<span class="script-placeholder">// Isi form dan klik "Generate Script" untuk menampilkan script OLT ZTE...</span>';
+  EL.outputMkt.innerHTML = '<span class="script-placeholder">// Script Mikrotik PPPoE Secret akan muncul di sini...</span>';
+  EL.validationMsg.style.display  = 'none';
+  EL.hintInterface.style.display  = 'none';
+  REQUIRED_FIELDS.forEach(f => f.el().classList.remove('invalid'));
+  renderCmdHub();
+  showToast('Form berhasil direset!');
+});
+
+/* ── CMD SEARCH / FILTER ──────────────────────────────────── */
+EL.cmdSearch.addEventListener('input', function () {
+  const q = this.value.trim().toLowerCase();
+  renderCmdHub(q);
+});
+
+/* ── TAB SWITCHING ────────────────────────────────────────── */
+const mainGrid  = document.querySelector('.main-grid');
+const panelFtth  = $('panelFtth');
+const panelTools = $('panelTools');
+
+document.querySelectorAll('.tab-bar .tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    mainGrid.style.display   = tab === 'unb'   ? 'grid' : 'none';
+    panelFtth.style.display  = tab === 'ftth'  ? 'block': 'none';
+    panelTools.style.display = tab === 'tools' ? 'block': 'none';
+  });
+});
 
 /* ── MODAL: QUICK FILL ────────────────────────────────────── */
 function openModal() {
@@ -583,6 +699,101 @@ EL.qfSubmit.addEventListener('click', () => {
   closeModal();
 
   showToast(filled ? `${filled} field berhasil diisi otomatis!` : 'Data tidak dikenali — periksa format teks.');
+});
+
+/* ── TOOLS: KALKULATOR REDAMAN FO ────────────────────────── */
+$('btnCalcFO').addEventListener('click', () => {
+  const len      = parseFloat($('foLength').value)   || 0;
+  const splice   = parseInt($('foSplice').value)     || 0;
+  const konektor = parseInt($('foKonektor').value)   || 0;
+  const splitter = parseFloat($('foSplitter').value) || 10.5;
+  const txPower  = parseFloat($('foTxPower').value);
+
+  if (isNaN(txPower)) { showToast('Isi Tx Power OLT terlebih dahulu!'); return; }
+
+  const FIBER_LOSS     = 0.35; // dB/km (G.652D)
+  const SPLICE_LOSS    = 0.10; // dB/splice
+  const KONEKTOR_LOSS  = 0.50; // dB/konektor
+
+  const fiberLoss    = len      * FIBER_LOSS;
+  const spliceLoss   = splice   * SPLICE_LOSS;
+  const konektorLoss = konektor * KONEKTOR_LOSS;
+  const totalLoss    = fiberLoss + spliceLoss + konektorLoss + splitter;
+  const rxPower      = txPower - totalLoss;
+
+  // Threshold ZTE GPON ONT
+  let statusClass, statusText;
+  if      (rxPower >= -8)  { statusClass = 'fo-ok';   statusText = 'SANGAT BAIK'; }
+  else if (rxPower >= -20) { statusClass = 'fo-ok';   statusText = 'BAIK'; }
+  else if (rxPower >= -24) { statusClass = 'fo-warn'; statusText = 'PERINGATAN — Hampir Batas'; }
+  else if (rxPower >= -27) { statusClass = 'fo-warn'; statusText = 'LEMAH — Perlu Cek Kabel'; }
+  else                     { statusClass = 'fo-bad';  statusText = 'BURUK — Kemungkinan LOS'; }
+
+  const res = $('foResult');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="fo-row"><span class="fo-label">Redaman Kabel (${len} km × ${FIBER_LOSS})</span><span class="fo-val">- ${fiberLoss.toFixed(2)} dB</span></div>
+    <div class="fo-row"><span class="fo-label">Redaman Splice (${splice} × ${SPLICE_LOSS})</span><span class="fo-val">- ${spliceLoss.toFixed(2)} dB</span></div>
+    <div class="fo-row"><span class="fo-label">Redaman Konektor (${konektor} × ${KONEKTOR_LOSS})</span><span class="fo-val">- ${konektorLoss.toFixed(2)} dB</span></div>
+    <div class="fo-row"><span class="fo-label">Redaman Splitter</span><span class="fo-val">- ${splitter.toFixed(1)} dB</span></div>
+    <hr class="fo-sep"/>
+    <div class="fo-row"><span class="fo-label">Total Redaman</span><span class="fo-total">- ${totalLoss.toFixed(2)} dB</span></div>
+    <div class="fo-row"><span class="fo-label">Tx Power OLT</span><span class="fo-val">+ ${txPower.toFixed(1)} dBm</span></div>
+    <hr class="fo-sep"/>
+    <div class="fo-row"><span class="fo-label">Estimasi Rx Power ONT</span><span class="fo-val">${rxPower.toFixed(2)} dBm</span></div>
+    <div class="fo-row"><span class="fo-label">Status Sinyal</span><span class="${statusClass}">${statusText}</span></div>`;
+});
+
+/* ── TOOLS: KONVERTER SUBNET ─────────────────────────────── */
+$('btnCalcSubnet').addEventListener('click', () => {
+  const raw = $('subnetInput').value.trim();
+  const match = raw.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(\d{1,2})$/);
+  if (!match) {
+    showToast('Format tidak valid. Gunakan: 192.168.1.0/24');
+    $('subnetInput').classList.add('invalid');
+    return;
+  }
+  $('subnetInput').classList.remove('invalid');
+
+  const [,a,b,c,d,prefix] = match.map(Number);
+  if ([a,b,c,d].some(o => o > 255) || prefix > 32) {
+    showToast('IP atau prefix tidak valid!');
+    return;
+  }
+
+  const ipNum    = (a<<24) | (b<<16) | (c<<8) | d;
+  const mask     = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+  const network  = (ipNum & mask) >>> 0;
+  const bcast    = (network | ~mask) >>> 0;
+  const firstIP  = prefix >= 31 ? network : network + 1;
+  const lastIP   = prefix >= 31 ? bcast   : bcast - 1;
+  const hosts    = prefix >= 32 ? 1 : prefix === 31 ? 2 : Math.pow(2, 32 - prefix) - 2;
+  const subnetMask = [24,16,8,0].map(s => (mask >>> s) & 0xFF).join('.');
+
+  const toIP = n => [24,16,8,0].map(s => (n >>> s) & 0xFF).join('.');
+
+  const res = $('subnetResult');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="sn-row"><span class="sn-label">IP Address</span><span class="sn-val">${raw.split('/')[0]}</span></div>
+    <div class="sn-row"><span class="sn-label">Subnet Mask</span><span class="sn-val">${subnetMask}</span></div>
+    <div class="sn-row"><span class="sn-label">Prefix</span><span class="sn-val">/${prefix}</span></div>
+    <div class="sn-row"><span class="sn-label">Network Address</span><span class="sn-val">${toIP(network)}</span></div>
+    <div class="sn-row"><span class="sn-label">Broadcast</span><span class="sn-val">${toIP(bcast)}</span></div>
+    <div class="sn-row"><span class="sn-label">Range IP Host</span><span class="sn-val">${toIP(firstIP)} – ${toIP(lastIP)}</span></div>
+    <div class="sn-row"><span class="sn-label">Jumlah Host</span><span class="sn-val">${hosts.toLocaleString('id-ID')} host</span></div>`;
+});
+
+/* ── KEYBOARD SHORTCUTS ───────────────────────────────────── */
+document.addEventListener('keydown', (e) => {
+  // Ctrl+Enter = Generate Script (di tab UNB)
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); generateScript(); }
+  // Ctrl+K = Buka Quick Fill
+  if (e.ctrlKey && e.key === 'k')     { e.preventDefault(); openModal(); }
+  // Esc = Tutup modal
+  if (e.key === 'Escape')             { closeModal(); }
+  // Ctrl+Shift+R = Reset form
+  if (e.ctrlKey && e.shiftKey && e.key === 'R') { e.preventDefault(); $('btnReset').click(); }
 });
 
 /* ── INIT ─────────────────────────────────────────────────── */
