@@ -148,27 +148,27 @@ write`,
 
   bridge: (v) =>
 `conf t
-interface gpon_olt-${v.IF}
+interface gpon-olt_${v.IF}
  onu ${v.OID} type ALL sn ${v.SN}
 exit
-interface gpon_onu-${v.IF}:${v.OID}
+interface gpon-onu_${v.IF}:${v.OID}
  name ${v.IDP}
  description ${v.IDP} - ${v.NMP}
  sn-bind enable sn
- tcont 1 profile kusuma
- gemport 1 tcont 1
- gemport 2 tcont 1
+ tcont 1 name PPPOE profile kusuma
+ gemport 1 name PPPOE tcont 1
+ gemport 2 name PPPOE tcont 1
  service-port 1 vport 1 user-vlan 105 vlan 105
  service-port 2 vport 2 user-vlan 102 vlan 102
 exit
-pon-onu-mng gpon_onu-${v.IF}:${v.OID}
+pon-onu-mng gpon-onu_${v.IF}:${v.OID}
  service 105 gemport 1 vlan 105
  service pppoe gemport 2 vlan 102
  vlan port eth_0/1 mode tag vlan 105
  vlan port eth_0/2 mode tag vlan 105
  vlan port eth_0/3 mode tag vlan 105
  vlan port eth_0/4 mode tag vlan 105
- wan-ip mode pppoe username ${v.PU} password ${v.PP} vlan-profile pppoe_vlan102 host 1
+ wan-ip 1 mode pppoe username ${v.PU} password ${v.PP} vlan-profile pppoe_vlan102 host 1
  security-mgmt 1 state enable mode forward protocol web
 exit
 exit
@@ -176,26 +176,26 @@ write`,
 
   bridge_bolo: (v) =>
 `conf t
-interface gpon_olt-${v.IF}
+interface gpon-olt_${v.IF}
  onu ${v.OID} type ALL sn ${v.SN}
 exit
-interface gpon_onu-${v.IF}:${v.OID}
+interface gpon-onu_${v.IF}:${v.OID}
  name ${v.IDP}
  description ${v.IDP} - ${v.NMP}
  sn-bind enable sn
- tcont 1 profile kusuma
- gemport 1 tcont 1
- gemport 2 tcont 1
+ tcont 1 name PPPOE profile kusuma
+ gemport 1 name PPPOE tcont 1
+ gemport 2 name PPPOE tcont 1
  service-port 1 vport 1 user-vlan 1500 vlan 1500
  service-port 2 vport 2 user-vlan 1501 vlan 1501
 exit
-pon-onu-mng gpon_onu-${v.IF}:${v.OID}
+pon-onu-mng gpon-onu_${v.IF}:${v.OID}
  service 1500 gemport 1 vlan 1500
  service pppoe gemport 2 vlan 1501
  vlan port eth_0/1 mode hybrid def-vlan 1500
  vlan port eth_0/2 mode hybrid def-vlan 1500
  vlan port eth_0/3 mode hybrid def-vlan 1500
- wan-ip mode pppoe username ${v.PU} password ${v.PP} vlan-profile bolo host 1
+ wan-ip 1 mode pppoe username ${v.PU} password ${v.PP} vlan-profile bolo host 1
  security-mgmt 1 state enable mode forward protocol web
 exit
 exit
