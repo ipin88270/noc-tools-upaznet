@@ -372,7 +372,10 @@ async function readAppData(key, fallback) {
   }
 }
 
-async function writeAppData(key, value) {
+async function writeAppData(key, value, options = {}) {
+  if (key === 'ftthPoints' && Array.isArray(value) && value.length === 0 && !options.allowEmpty) {
+    return true;
+  }
   try {
     await CLOUD_STATE_DOC.set({ [key]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     return true;
@@ -2074,7 +2077,7 @@ $('btnResetFtthData')?.addEventListener('click', async () => {
     }
   }
   ftthRoutes = [];
-  await writeAppData('ftthPoints', FTTH_POINTS);
+  await writeAppData('ftthPoints', FTTH_POINTS, { allowEmpty: true });
   await writeAppData('ftthRoutes', ftthRoutes);
   populateOdcOptions();
   populateRouteOptions();
