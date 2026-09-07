@@ -360,7 +360,7 @@ function openAppDb() {
 async function readAppData(key, fallback) {
   try {
     const snapshot = await CLOUD_STATE_DOC.get();
-    if (snapshot.exists && snapshot.exists() && Object.prototype.hasOwnProperty.call(snapshot.data(), key)) {
+    if (snapshot.exists && Object.prototype.hasOwnProperty.call(snapshot.data(), key)) {
       return snapshot.data()[key];
     }
     return fallback;
