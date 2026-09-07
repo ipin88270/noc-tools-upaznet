@@ -362,18 +362,10 @@ async function readAppData(key, fallback) {
     if (snapshot.exists && snapshot.exists() && Object.prototype.hasOwnProperty.call(snapshot.data(), key)) {
       return snapshot.data()[key];
     }
+    return fallback;
   } catch (error) {
-    console.warn('Cloud read failed, using local fallback:', error);
-  }
-  try {
-    const db = await openAppDb();
-    return await new Promise((resolve, reject) => {
-      const request = db.transaction(APP_STORE_NAME, 'readonly').objectStore(APP_STORE_NAME).get(key);
-      request.onsuccess = () => resolve(request.result === undefined ? fallback : request.result);
-      request.onerror = () => reject(request.error);
-    });
-  } catch (error) {
-    console.error('IndexedDB read failed:', error);
+    console.error('Cloud read failed:', error);
+    showToast('Data online tidak dapat dibaca. Periksa koneksi dan Firestore Rules.');
     return fallback;
   }
 }
@@ -400,6 +392,8 @@ async function writeAppData(key, value) {
 }
 
 async function migrateStorageData() {
+  // Firestore is authoritative. Never upload another device's local cache.
+  if (typeof CLOUD_STATE_DOC !== 'undefined') return;
   const migrations = [
     ['ftthPoints', null],
     ['ftthRoutes', []],
