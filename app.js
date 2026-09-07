@@ -344,6 +344,7 @@ const APP_STORE_NAME = 'appData';
 const DEFAULT_DATA_ONLY = false;
 const EMPTY_DEFAULT_FTTH_NETWORK = true;
 let cloudReadFailed = false;
+let cloudWriteWarningShown = false;
 let appDbPromise;
 
 function openAppDb() {
@@ -381,7 +382,10 @@ async function writeAppData(key, value) {
     return true;
   } catch (error) {
     console.error('Cloud write failed:', error);
-    showToast('Data online gagal disimpan. Periksa koneksi dan Firestore Rules.');
+    if (!cloudWriteWarningShown) {
+      cloudWriteWarningShown = true;
+      showToast('Sinkronisasi online gagal; perubahan lokal tetap dipakai. Periksa Firestore Rules.');
+    }
   }
   if (DEFAULT_DATA_ONLY) return false;
   try {
