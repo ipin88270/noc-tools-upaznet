@@ -373,11 +373,12 @@ async function readAppData(key, fallback) {
 async function writeAppData(key, value) {
   try {
     await CLOUD_STATE_DOC.set({ [key]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    return;
+    return true;
   } catch (error) {
-    console.warn('Cloud write failed, using local fallback:', error);
+    console.error('Cloud write failed:', error);
+    showToast('Data online gagal disimpan. Periksa koneksi dan Firestore Rules.');
   }
-  if (DEFAULT_DATA_ONLY) return;
+  if (DEFAULT_DATA_ONLY) return false;
   try {
     const db = await openAppDb();
     await new Promise((resolve, reject) => {
@@ -389,6 +390,7 @@ async function writeAppData(key, value) {
     console.error('IndexedDB write failed:', error);
     showToast('Penyimpanan lokal gagal diperbarui.');
   }
+  return false;
 }
 
 async function migrateStorageData() {
@@ -1496,7 +1498,7 @@ function normalizeFtthImportRow(row, type) {
 function importFtthExcel(file, type) {
   if (!file || !window.XLSX) return;
   const reader = new FileReader();
-  reader.onload = event => {
+  reader.onload = async event => {
     const workbook = XLSX.read(event.target.result, { type: 'array' });
     const rows     = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
     const imported = rows
@@ -1524,7 +1526,7 @@ function importFtthExcel(file, type) {
       }
     });
 
-    writeAppData('ftthPoints', FTTH_POINTS);
+    const savedOnline = await writeAppData('ftthPoints', FTTH_POINTS);
     populateOdcOptions();
     populateRouteOptions();
     renderFtthTables();
@@ -1533,7 +1535,9 @@ function importFtthExcel(file, type) {
     const parts = [];
     if (added)   parts.push(`${added} data baru ditambahkan`);
     if (updated) parts.push(`${updated} data diperbarui`);
-    showToast(`Import ${type.toUpperCase()} selesai: ${parts.join(', ')}.`);
+    showToast(savedOnline
+      ? `Import ${type.toUpperCase()} tersimpan online: ${parts.join(', ')}.`
+      : `Import ${type.toUpperCase()} hanya tersimpan lokal.`);
     event.target.value = '';
   };
   reader.readAsArrayBuffer(file);
