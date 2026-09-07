@@ -356,6 +356,14 @@ function openAppDb() {
 
 async function readAppData(key, fallback) {
   try {
+    const snapshot = await CLOUD_STATE_DOC.get();
+    if (snapshot.exists && snapshot.exists() && Object.prototype.hasOwnProperty.call(snapshot.data(), key)) {
+      return snapshot.data()[key];
+    }
+  } catch (error) {
+    console.warn('Cloud read failed, using local fallback:', error);
+  }
+  try {
     const db = await openAppDb();
     return await new Promise((resolve, reject) => {
       const request = db.transaction(APP_STORE_NAME, 'readonly').objectStore(APP_STORE_NAME).get(key);
@@ -369,6 +377,12 @@ async function readAppData(key, fallback) {
 }
 
 async function writeAppData(key, value) {
+  try {
+    await CLOUD_STATE_DOC.set({ [key]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    return;
+  } catch (error) {
+    console.warn('Cloud write failed, using local fallback:', error);
+  }
   if (DEFAULT_DATA_ONLY) return;
   try {
     const db = await openAppDb();
@@ -1293,7 +1307,7 @@ function validateFtthData(points) {
 function importFtthFile(file) {
   if (!file || !window.XLSX) return;
   const reader = new FileReader();
-  reader.onload = event => {
+  reader.onload = async event => {
     const workbook = XLSX.read(event.target.result, { type: 'array' });
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
     const imported = rows.map(row => {
@@ -1306,7 +1320,9 @@ function importFtthFile(file) {
     // Validate imported data
     const validationErrors = validateFtthData(imported);
     if (validationErrors.length) { showToast('Validasi gagal: ' + validationErrors.join(', ')); return; }
-    FTTH_POINTS.splice(0, FTTH_POINTS.length, ...imported); populateOdcOptions(); populateRouteOptions(); renderFtthTables(); renderFtthValidation(); showToast(`${imported.length} titik FTTH berhasil diimpor.`);
+    FTTH_POINTS.splice(0, FTTH_POINTS.length, ...imported);
+    await writeAppData('ftthPoints', FTTH_POINTS);
+    populateOdcOptions(); populateRouteOptions(); renderFtthTables(); renderFtthValidation(); showToast(`${imported.length} titik FTTH berhasil diimpor.`);
   };
   reader.readAsArrayBuffer(file);
 }
@@ -2056,6 +2072,8 @@ $('btnResetFtthData')?.addEventListener('click', async () => {
     }
   }
   ftthRoutes = [];
+  await writeAppData('ftthPoints', FTTH_POINTS);
+  await writeAppData('ftthRoutes', ftthRoutes);
   populateOdcOptions();
   populateRouteOptions();
   updateFtthMap(FTTH_POINTS);
@@ -3628,6 +3646,12 @@ async function initializeAppStorage() {
     renderFtthTables();
     renderHistory();
     renderCustomerTable();
+    await Promise.all([
+      writeAppData('ftthPoints', FTTH_POINTS),
+      writeAppData('ftthRoutes', ftthRoutes),
+      writeAppData(HISTORY_KEY, historyCache),
+      writeAppData(DB_KEY, customerCache),
+    ]);
     return;
   }
 
