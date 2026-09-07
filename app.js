@@ -339,7 +339,7 @@ const $ = (id) => document.getElementById(id);
 const APP_DB_NAME = 'gponUpaznetDB';
 const APP_DB_VERSION = 1;
 const APP_STORE_NAME = 'appData';
-const DEFAULT_DATA_ONLY = true;
+const DEFAULT_DATA_ONLY = false;
 const EMPTY_DEFAULT_FTTH_NETWORK = true;
 let appDbPromise;
 
