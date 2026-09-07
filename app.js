@@ -339,6 +339,7 @@ const $ = (id) => document.getElementById(id);
 const APP_DB_NAME = 'gponUpaznetDB';
 const APP_DB_VERSION = 1;
 const APP_STORE_NAME = 'appData';
+const DEFAULT_DATA_ONLY = true;
 let appDbPromise;
 
 function openAppDb() {
@@ -367,6 +368,7 @@ async function readAppData(key, fallback) {
 }
 
 async function writeAppData(key, value) {
+  if (DEFAULT_DATA_ONLY) return;
   try {
     const db = await openAppDb();
     await new Promise((resolve, reject) => {
@@ -2059,7 +2061,7 @@ async function loadOdcDatabase() {
   // If the user has already interacted with data (even deleted everything),
   // the key exists as [] and we must not re-inject.
   try {
-    const stored = await readAppData('ftthPoints', null);
+    const stored = DEFAULT_DATA_ONLY ? null : await readAppData('ftthPoints', null);
     if (stored !== null) return; // user's data takes priority
     const response = await fetch('ftth-odc-data.json');
     const data = await response.json();
@@ -3589,12 +3591,14 @@ setupAutocomplete(EL.namaPelanggan, $('nameAcDropdown'), 'namaPelanggan');
 
 async function initializeAppStorage() {
   await migrateStorageData();
-  const [points, routes, history, customers] = await Promise.all([
-    readAppData('ftthPoints', null),
-    readAppData('ftthRoutes', []),
-    readAppData(HISTORY_KEY, []),
-    readAppData(DB_KEY, []),
-  ]);
+  const [points, routes, history, customers] = DEFAULT_DATA_ONLY
+    ? [null, [], [], []]
+    : await Promise.all([
+        readAppData('ftthPoints', null),
+        readAppData('ftthRoutes', []),
+        readAppData(HISTORY_KEY, []),
+        readAppData(DB_KEY, []),
+      ]);
   // `points === null` means the key was never saved (first run).
   // If the user cleared all data, `points` will be [] — respect that and do NOT re-inject.
   const isFirstRun = points === null;
