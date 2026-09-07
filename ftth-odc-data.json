@@ -1,0 +1,886 @@
+{
+  "odc": [
+    {
+      "id": "ODC_BJI-01_UAB_F1_1",
+      "nama": "ODC BJI-01 UAB F1 (1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/12",
+      "splitter": 8,
+      "redaman": -5.26,
+      "oop": 9,
+      "pelanggan": "45 INDOMARET MASTRIP",
+      "koordinat": [
+        -8.078622,
+        111.907298
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UAC_F1_6",
+      "nama": "ODC BJI-01 UAC F1 (6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/13",
+      "splitter": 8,
+      "redaman": -8.98,
+      "oop": 7,
+      "pelanggan": "37 P4TAN SLTN BIS GOLING",
+      "koordinat": [
+        -8.077084,
+        111.914103
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UAF_F1_7",
+      "nama": "ODC BJI-01 UAF F1 (7)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/16",
+      "splitter": 8,
+      "redaman": -8.78,
+      "oop": 9,
+      "pelanggan": "36 P4TAN BIS GOLING",
+      "koordinat": [
+        -8.075564,
+        111.91424
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UBH_F212",
+      "nama": "ODC BJI-01 UBH F2(12)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/12",
+      "splitter": 8,
+      "redaman": -10.3,
+      "oop": 1,
+      "pelanggan": "11 odc perempatan 555",
+      "koordinat": [
+        -8.065094,
+        111.898485
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UI_F3_1",
+      "nama": "ODC BJI-01 UI F3 (1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/9",
+      "splitter": 8,
+      "redaman": -5.3,
+      "oop": 13,
+      "pelanggan": "74 P4TAN SD BJ 1",
+      "koordinat": [
+        -8.078753,
+        111.902792
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UJ_F3_2",
+      "nama": "ODC BJI-01 UJ F3 (2)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/10",
+      "splitter": 8,
+      "redaman": -2.2,
+      "oop": 9,
+      "pelanggan": "36 GANG RUMAH ABU",
+      "koordinat": [
+        -8.078463,
+        111.894932
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UK_F3_3",
+      "nama": "ODC BJI-01 UK F3 (3)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/11",
+      "splitter": 8,
+      "redaman": -7.41,
+      "oop": 11,
+      "pelanggan": "62 P4TAN PASAR BURUNG",
+      "koordinat": [
+        -8.081742,
+        111.902789
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UL_F3_4",
+      "nama": "ODC BJI-01 UL F3 (4)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/12",
+      "splitter": 8,
+      "redaman": -8.5,
+      "oop": 9,
+      "pelanggan": "50 P4TAN VETERAN",
+      "koordinat": [
+        -8.081521,
+        111.896295
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UM_F3_5",
+      "nama": "ODC BJI-01 UM F3 (5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/13",
+      "splitter": 8,
+      "redaman": -7.5,
+      "oop": 4,
+      "pelanggan": "23 TIARA ASRI",
+      "koordinat": [
+        -8.083323,
+        111.889026
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UN_F3_6",
+      "nama": "ODC BJI-01 UN F3 (6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/14",
+      "splitter": 8,
+      "redaman": -6.21,
+      "oop": 7,
+      "pelanggan": "30 P4TAN PAJAK",
+      "koordinat": [
+        -8.08855,
+        111.900806
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UO_F3_7",
+      "nama": "ODC BJI-01 UO F3 (7)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/15",
+      "splitter": 4,
+      "redaman": -14.38,
+      "oop": 7,
+      "pelanggan": "52 DEPAN POM BEJI",
+      "koordinat": [
+        -8.091425,
+        111.899956
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UQ_F2_1",
+      "nama": "ODC BJI-01 UQ F2 (1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/1",
+      "splitter": 8,
+      "redaman": -5.17,
+      "oop": 6,
+      "pelanggan": "54 P3AN SRI REJEKI",
+      "koordinat": [
+        -8.07685,
+        111.902508
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UR_F2_2",
+      "nama": "ODC BJI-01 UR F2 (2)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/2",
+      "splitter": 8,
+      "redaman": -6.33,
+      "oop": 9,
+      "pelanggan": "74 P3AN SLTN TAMANAN",
+      "koordinat": [
+        -8.074296,
+        111.902112
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_US_F2_5",
+      "nama": "ODC BJI-01 US F2 (5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/3",
+      "splitter": 8,
+      "redaman": -5.5,
+      "oop": 12,
+      "pelanggan": "111 DEPAN RUKO PIZZA",
+      "koordinat": [
+        -8.071936,
+        111.901681
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UT_F2_6",
+      "nama": "ODC BJI-01 UT F2 (6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/4",
+      "splitter": 8,
+      "redaman": -4.6,
+      "oop": 8,
+      "pelanggan": "47 P4TAN TOP CELL",
+      "koordinat": [
+        -8.06393,
+        111.902828
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UU_F2_7",
+      "nama": "ODC BJI-01 UU F2 (7)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/5",
+      "splitter": 8,
+      "redaman": -6.45,
+      "oop": 1,
+      "pelanggan": "4 P4TAN SMP 1",
+      "koordinat": [
+        -8.055979,
+        111.902258
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UV_F2_8",
+      "nama": "ODC BJI-01 UV F2 (8)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/6",
+      "splitter": 8,
+      "redaman": -6.7,
+      "oop": 9,
+      "pelanggan": "36 P4TAN KOMINFO",
+      "koordinat": [
+        -8.049299,
+        111.905587
+      ]
+    },
+    {
+      "id": "ODC_BJI-01_UX_F2_10",
+      "nama": "ODC BJI-01 UX F2 (10)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/8",
+      "splitter": 8,
+      "redaman": -9.74,
+      "oop": 5,
+      "pelanggan": "32 PURI PERMATA",
+      "koordinat": [
+        -8.051476,
+        111.892198
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UA_F3_1",
+      "nama": "ODC BJI-02 UA F3 (1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/1",
+      "splitter": 8,
+      "redaman": -6.5,
+      "oop": 9,
+      "pelanggan": "70 WARKOP INDOPLAY",
+      "koordinat": [
+        -8.07864,
+        111.90519
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAA_F2_16_1",
+      "nama": "ODC BJI-02 UAA F2 (16.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/11",
+      "splitter": 8,
+      "redaman": -8.8,
+      "oop": 4,
+      "pelanggan": "5 LETER S WONOREJO",
+      "koordinat": [
+        -8.08564,
+        111.937984
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAS_F3_22_8_6",
+      "nama": "ODC BJI-02 UAS F3 (22.8.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/13",
+      "splitter": 4,
+      "redaman": -10.44,
+      "oop": 6,
+      "pelanggan": "24 BALDES JUNJUNG",
+      "koordinat": [
+        -8.114562,
+        111.925415
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAS_F3___",
+      "nama": "ODC BJI-02 UAS F3 //",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/13",
+      "splitter": 4,
+      "redaman": 0.0,
+      "oop": 0,
+      "pelanggan": "0 PECAHAN ODC UAS , PEREMPATAN TIMUR SDN JUNJUNG 2",
+      "koordinat": [
+        -8.120969,
+        111.934425
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAW_F2_23_5",
+      "nama": "ODC BJI-02 UAW F2 (23.5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/1",
+      "splitter": 4,
+      "redaman": -7.17,
+      "oop": 4,
+      "pelanggan": "29 PEREMPATAN PASAR PAGI PASIR",
+      "koordinat": [
+        -8.115468,
+        111.94192
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAW_F2___",
+      "nama": "ODC BJI-02 UAW F2 //",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/1",
+      "splitter": 4,
+      "redaman": 0.0,
+      "oop": 1,
+      "pelanggan": "7 PECAHAN ODC UAW , JL. RAYA SAMBIDOPLANG",
+      "koordinat": [
+        -8.144445,
+        111.962932
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UAX_F2_19_6",
+      "nama": "ODC BJI-02 UAX F2 (19.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/2",
+      "splitter": 4,
+      "redaman": -6.62,
+      "oop": 6,
+      "pelanggan": "9 PERTIGAAN WAJAK KIDUL",
+      "koordinat": [
+        -8.110591,
+        111.913588
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UB_F3_6_1",
+      "nama": "ODC BJI-02 UB F3 (6.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/2",
+      "splitter": 8,
+      "redaman": -5.0,
+      "oop": 9,
+      "pelanggan": "56 KUBURAN KRAPYAK",
+      "koordinat": [
+        -8.083471,
+        111.907304
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UBJ_F2_4",
+      "nama": "ODC BJI-02 UBJ F2 (4)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/14",
+      "splitter": 4,
+      "redaman": -10.6,
+      "oop": 1,
+      "pelanggan": "4 ODC DEPAN PONDOK AL-KHOIRIYAH",
+      "koordinat": [
+        -8.122261,
+        111.950517
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UBK_F2_2",
+      "nama": "ODC BJI-02 UBK F2 (2)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/15",
+      "splitter": 4,
+      "redaman": -13.1,
+      "oop": 5,
+      "pelanggan": "9 ODC UTARA TIKUNGAN BETAK",
+      "koordinat": [
+        -8.121722,
+        111.948376
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UC_F3_8_1",
+      "nama": "ODC BJI-02 UC F3 (8.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/3",
+      "splitter": 8,
+      "redaman": -5.0,
+      "oop": 7,
+      "pelanggan": "21 TOKO COKRO",
+      "koordinat": [
+        -8.085909,
+        111.907329
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UD_F2_9_4",
+      "nama": "ODC BJI-02 UD F2 (9.4)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/4",
+      "splitter": 4,
+      "redaman": -9.6,
+      "oop": 9,
+      "pelanggan": "35 GAPURO KEPUH",
+      "koordinat": [
+        -8.090839,
+        111.907731
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UE_F3_10_5",
+      "nama": "ODC BJI-02 UE F3 (10.5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/5",
+      "splitter": 8,
+      "redaman": -6.25,
+      "oop": 11,
+      "pelanggan": "45 SORUM MOBIL",
+      "koordinat": [
+        -8.09322,
+        111.908089
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UF_F2_11_6",
+      "nama": "ODC BJI-02 UF F2 (11.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/6",
+      "splitter": 8,
+      "redaman": -7.75,
+      "oop": 9,
+      "pelanggan": "60 PASAR WAJAK",
+      "koordinat": [
+        -8.095625,
+        111.908789
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UG_F2_12_7",
+      "nama": "ODC BJI-02 UG F2 (12.7)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/7",
+      "splitter": 8,
+      "redaman": -8.14,
+      "oop": 4,
+      "pelanggan": "13 BALDES WAJAK",
+      "koordinat": [
+        -8.102706,
+        111.912232
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UH_F2_13_8",
+      "nama": "ODC BJI-02 UH F2 (13.8)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/8",
+      "splitter": 8,
+      "redaman": -7.25,
+      "oop": 8,
+      "pelanggan": "40 TOKO PERTANIAN WJK",
+      "koordinat": [
+        -8.10721,
+        111.912217
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UY_F2_14_8",
+      "nama": "ODC BJI-02 UY F2 (14.8)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/9",
+      "splitter": 8,
+      "redaman": -5.7,
+      "oop": 5,
+      "pelanggan": "11 BARAT BALDES TJS",
+      "koordinat": [
+        -8.084983,
+        111.925994
+      ]
+    },
+    {
+      "id": "ODC_BJI-02_UZ_F2_15_9_1",
+      "nama": "ODC BJI-02 UZ F2 (15.9.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/10",
+      "splitter": 8,
+      "redaman": -6.7,
+      "oop": 8,
+      "pelanggan": "28 P3AN MSJID PLK",
+      "koordinat": [
+        -8.083318,
+        111.925983
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAD_F1_16_4",
+      "nama": "ODC BJI-03 UAD F1 (16.4)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/14",
+      "splitter": 8,
+      "redaman": -8.87,
+      "oop": 11,
+      "pelanggan": "32 P4TAN PENGADILAN AGAMA",
+      "koordinat": [
+        -8.063875,
+        111.872128
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAE_F2_12",
+      "nama": "ODC BJI-03 UAE F2 (12)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/15",
+      "splitter": 8,
+      "redaman": -7.88,
+      "oop": 7,
+      "pelanggan": "58 P4TAN SD TINGKAT",
+      "koordinat": [
+        -8.071094,
+        111.914439
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAG_F1_24_12",
+      "nama": "ODC BJI-03 UAG F1 (24.12)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/1",
+      "splitter": 8,
+      "redaman": -8.8,
+      "oop": 8,
+      "pelanggan": "25 PASAR KLIWON",
+      "koordinat": [
+        -8.054903,
+        111.865892
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAH_F1_19_7_1",
+      "nama": "ODC BJI-03 UAH F1 (19.7.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/2",
+      "splitter": 8,
+      "redaman": -10.4,
+      "oop": 8,
+      "pelanggan": "59 PEREMPATAN MENCLE BOLO REJO",
+      "koordinat": [
+        -8.049655,
+        111.857842
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAI_F1_7_1",
+      "nama": "ODC BJI-03 UAI F1 (7.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/3",
+      "splitter": 8,
+      "redaman": -10.53,
+      "oop": 5,
+      "pelanggan": "16 P4TAN BATANGSAREN",
+      "koordinat": [
+        -8.052835,
+        111.884691
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAJ_F2_6_6",
+      "nama": "ODC BJI-03 UAJ F2 (6.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/4",
+      "splitter": 8,
+      "redaman": -10.14,
+      "oop": 5,
+      "pelanggan": "32 P4TAN RADIO JOSS",
+      "koordinat": [
+        -8.058702,
+        111.916621
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAK_F2_11",
+      "nama": "ODC BJI-03 UAK F2 (11)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/5",
+      "splitter": 8,
+      "redaman": -8.5,
+      "oop": 6,
+      "pelanggan": "47 P4TAN KEPATIHAN",
+      "koordinat": [
+        -8.063817,
+        111.915813
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAL_F1_6",
+      "nama": "ODC BJI-03 UAL F1 (6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/6",
+      "splitter": 8,
+      "redaman": -7.13,
+      "oop": 5,
+      "pelanggan": "27 PURI MAS",
+      "koordinat": [
+        -8.058066,
+        111.89005
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAM_F2_1",
+      "nama": "ODC BJI-03 UAM F2 (1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/7",
+      "splitter": 8,
+      "redaman": -5.5,
+      "oop": 2,
+      "pelanggan": "6 LDII NOTOK",
+      "koordinat": [
+        -8.081478,
+        111.918053
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAN_F2_9",
+      "nama": "ODC BJI-03 UAN F2 (9)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/8",
+      "splitter": 8,
+      "redaman": -9.85,
+      "oop": 7,
+      "pelanggan": "24 PATUNG POLISI",
+      "koordinat": [
+        -8.051972,
+        111.913472
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAO_F2_5",
+      "nama": "ODC BJI-03 UAO F2 (5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/9",
+      "splitter": 4,
+      "redaman": -5.15,
+      "oop": 4,
+      "pelanggan": "12 DEPAN IAIN",
+      "koordinat": [
+        -8.079167,
+        111.928944
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAP_F2_13_1",
+      "nama": "ODC BJI-03 UAP F2 (13.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/10",
+      "splitter": 8,
+      "redaman": -11.4,
+      "oop": 3,
+      "pelanggan": "4 TIMUR SIROJUT",
+      "koordinat": [
+        -8.077917,
+        111.937639
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAQ_F2_15_3",
+      "nama": "ODC BJI-03 UAQ F2 (15.3)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/11",
+      "splitter": 8,
+      "redaman": -7.7,
+      "oop": 2,
+      "pelanggan": "4 P4TAN LOR SIROJUT",
+      "koordinat": [
+        -8.075117,
+        111.931608
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAR_F1_5",
+      "nama": "ODC BJI-03 UAR F1 (5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/12",
+      "splitter": 8,
+      "redaman": -6.33,
+      "oop": 3,
+      "pelanggan": "12 TIMUR HSP / SLT MUGIONO",
+      "koordinat": [
+        -8.062937,
+        111.889621
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAT_F1_8_11_1",
+      "nama": "ODC BJI-03 UAT F1 (8.11.1)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/14",
+      "splitter": 8,
+      "redaman": -9.0,
+      "oop": 4,
+      "pelanggan": "10 JEMBATAN GANTUNG",
+      "koordinat": [
+        -8.067192,
+        111.887249
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAU_F2_16_4",
+      "nama": "ODC BJI-03 UAU F2 (16.4)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/4/15",
+      "splitter": 8,
+      "redaman": -8.26,
+      "oop": 7,
+      "pelanggan": "27 WARKOP BROMBONG",
+      "koordinat": [
+        -8.072248,
+        111.925749
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UAZ",
+      "nama": "ODC BJI-03 UAZ",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/4",
+      "splitter": 8,
+      "redaman": -10.6,
+      "oop": 6,
+      "pelanggan": "41 PEREMPATAN WARKOP MARKAS BOLO",
+      "koordinat": [
+        -8.053284,
+        111.863229
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBA_F1_7_6",
+      "nama": "ODC BJI-03 UBA F1 (7.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/5",
+      "splitter": 4,
+      "redaman": -7.7,
+      "oop": 2,
+      "pelanggan": "14 ODC SRABAH",
+      "koordinat": [
+        -8.04595,
+        111.8573
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBB_F1_20_3_8",
+      "nama": "ODC BJI-03 UBB F1 (20.3.8)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/6",
+      "splitter": 8,
+      "redaman": -14.5,
+      "oop": 2,
+      "pelanggan": "5 BALDES JATIMULYO",
+      "koordinat": [
+        -8.038743,
+        111.875308
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBC_F1_4_9_5",
+      "nama": "ODC BJI-03 UBC F1 (4.9.5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/7",
+      "splitter": 4,
+      "redaman": -11.3,
+      "oop": 5,
+      "pelanggan": "17 JALUR KATES",
+      "koordinat": [
+        -8.029775,
+        111.863156
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBD_F1_10_1_10_6",
+      "nama": "ODC BJI-03 UBD F1 (10.1.10.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/8",
+      "splitter": 4,
+      "redaman": -11.9,
+      "oop": 4,
+      "pelanggan": "3 ODC PERTIGAAN ATAS ANGIN",
+      "koordinat": [
+        -8.026481,
+        111.870347
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBE_F1_11_5",
+      "nama": "ODC BJI-03 UBE F1 (11.5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/9",
+      "splitter": 8,
+      "redaman": -7.2,
+      "oop": 1,
+      "pelanggan": "2 ODC PERTIGAAN ARAH PERUM MUTIARA ALAM",
+      "koordinat": [
+        -8.075167,
+        111.880758
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBF_F1_12_6",
+      "nama": "ODC BJI-03 UBF F1 (12.6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/10",
+      "splitter": 4,
+      "redaman": -7.21,
+      "oop": 1,
+      "pelanggan": "4 depan perum permata kota 2",
+      "koordinat": [
+        -8.082911,
+        111.875747
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBG_F1_6",
+      "nama": "ODC BJI-03 UBG F1 (6)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/11",
+      "splitter": 4,
+      "redaman": -7.7,
+      "oop": 2,
+      "pelanggan": "1 ODC GONDANG DEPAN MAKAN",
+      "koordinat": [
+        -8.062897,
+        111.851358
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UBL_F2_8_2_1_8_",
+      "nama": "ODC BJI-03 UBL F2 (8.2.1.8 )",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/5/16",
+      "splitter": 8,
+      "redaman": -9.09,
+      "oop": 1,
+      "pelanggan": "9 PERTIGAAN SELATAN GUDANG CEMPAKA",
+      "koordinat": [
+        -8.058957,
+        111.904565
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UP_F1_17_5",
+      "nama": "ODC BJI-03 UP F1 (17.5)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/2/16",
+      "splitter": 8,
+      "redaman": -9.16,
+      "oop": 4,
+      "pelanggan": "14 PERTIGAAN JETAAN",
+      "koordinat": [
+        -8.059997,
+        111.863972
+      ]
+    },
+    {
+      "id": "ODC_BJI-03_UW_F1_13_2",
+      "nama": "ODC BJI-03 UW F1 (13.2)",
+      "olt": "OLT1-BJ_UNB",
+      "interface": "1/3/7",
+      "splitter": 8,
+      "redaman": -20.6,
+      "oop": 5,
+      "pelanggan": "28 ODC BARAT JEMBATAN GOR LEMBU PETENG",
+      "koordinat": [
+        -8.070982,
+        111.884521
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CONFIGURASI GPON UPAZNET – UNB Script Generator</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- SheetJS untuk import file Excel (.xlsx/.xls) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     HEADER
+════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="8" rx="2"/>
+        <rect x="2" y="14" width="20" height="8" rx="2"/>
+        <line x1="6" y1="6"  x2="6.01" y2="6"/>
+        <line x1="6" y1="18" x2="6.01" y2="18"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">CONFIGURASI GPON UPAZNET</div>
+      <div class="header-sub">NOC Tool &mdash; GPON Script Generator</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" data-tab="unb">CONFIGURASI</button>
+    <button class="tab" data-tab="ftth">FTTH</button>
+    <button class="tab" data-tab="tools">TOOLS</button>
+    <button class="tab" data-tab="pelanggan">PELANGGAN</button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════
+     TAB UNB — MAIN GRID (3 KOLOM)
+════════════════════════════════════ -->
+<div class="main-grid" id="panelUnb">
+
+  <!-- ═══ KOLOM KIRI: FORM INPUT ═══ -->
+  <div class="card">
+    <div class="card-header">Form Input</div>
+    <div class="card-body">
+
+      <!-- Quick Fill + Reset -->
+      <div class="form-action-row">
+        <button class="btn-quick-fill" id="btnQuickFill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          Import Data
+        </button>
+        <button class="btn-reset" id="btnReset" title="Reset semua field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset
+        </button>
+      </div>
+
+      <!-- Branch selector -->
+      <div class="form-group">
+        <div class="branch-toggle">
+          <button type="button" id="branchUnb" class="branch-btn active">UNB</button>
+          <button type="button" id="branchUcd" class="branch-btn">UCD</button>
+        </div>
+        <!-- Tipe Konfigurasi -->
+        <label class="form-label" for="configType">Tipe Konfigurasi</label>
+        <select class="form-control" id="configType">
+          <optgroup label="── UNB Branch ──">
+            <option value="v100">UNB V100</option>
+            <option value="v1600">UNB V1600 (AL KHORIYAH)</option>
+            <option value="v1501">UNB V1501 (BOLO)</option>
+            <option value="v602">UNB V602 (ALNET)</option>
+            <option value="v903">UNB V903 (LEXXA)</option>
+          </optgroup>
+          <optgroup label="── UNB Bridge ──">
+            <option value="bridge">UNB Bridge</option>
+            <option value="bridge_bolo">Bridge Bolo</option>
+            <option value="bridge_1601">Bridge AL-KHOIRIYAH V1601</option>
+          </optgroup>
+          <optgroup label="── UCD Branch ──">
+            <option value="ucd_v511">UCD Standard (PPPoE VLAN 511)</option>
+            <option value="ucd_bridge514">UCD Bridge (VLAN 514/511)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Interface OLT + ONU ID -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="interfaceOlt">Interface OLT</label>
+          <input class="form-control" id="interfaceOlt" type="text"
+                 placeholder="e.g. 1/4/2" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="onuId">ONU ID</label>
+          <input class="form-control" id="onuId" type="text"
+                 placeholder="e.g. 88" autocomplete="off"/>
+        </div>
+      </div>
+
+      <div class="onu-detect-panel">
+        <div class="onu-detect-header">
+          <div>
+            <div class="onu-detect-title">Auto-detect ONU</div>
+            <div class="onu-detect-sub">Salin command, jalankan di OLT, lalu paste hasilnya untuk mengisi slot dan SN.</div>
+          </div>
+          <button type="button" class="btn-db-action use" id="btnCopyUncfgCommand">Copy command</button>
+        </div>
+        <textarea class="form-control onu-detect-input" id="uncfgOutput" rows="3"
+                  placeholder="Paste hasil show gpon onu uncfg di sini..."></textarea>
+        <div class="onu-detect-actions">
+          <button type="button" class="btn-quick-fill" id="btnDetectOnu">Ambil ONU Pertama</button>
+          <span class="onu-detect-status" id="onuDetectStatus"></span>
+        </div>
+      </div>
+
+      <!-- Hint Interface Format -->
+      <div class="field-hint hidden" id="hintInterface">
+        Format: angka/angka/angka &nbsp;(contoh: 1/4/2)
+      </div>
+
+      <!-- Serial Number + MAC Address -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="sn">Serial Number (SN)</label>
+          <input class="form-control text-upper" id="sn" type="text"
+                 placeholder="e.g. HWTCDF67C578" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="macAddr">MAC Address</label>
+          <input class="form-control text-lower" id="macAddr" type="text"
+                 placeholder="e.g. c4eb.ff21.c531" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- Section Header: PPPoE -->
+      <div class="form-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83
+                   M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+        Konfigurasi PPPoE Secret &amp; Pelanggan
+      </div>
+
+      <!-- ID Pelanggan + Nama Pelanggan -->
+      <div class="grid-2">
+        <div class="form-group autocomplete-container">
+          <label class="form-label" for="idPelanggan">ID Pelanggan</label>
+          <input class="form-control" id="idPelanggan" type="text"
+                 placeholder="e.g. 2010102081" autocomplete="off"/>
+          <div class="autocomplete-dropdown hidden" id="idAcDropdown"></div>
+        </div>
+        <div class="form-group autocomplete-container">
+          <label class="form-label" for="namaPelanggan">Nama Pelanggan</label>
+          <input class="form-control text-upper" id="namaPelanggan" type="text"
+                 placeholder="e.g. IR. BAMBANG SUTOMO" autocomplete="off"/>
+          <div class="autocomplete-dropdown hidden" id="nameAcDropdown"></div>
+        </div>
+      </div>
+
+      <!-- Paket + PPPoE User + PPPoE Pass -->
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label" for="paketLayanan">Paket Layanan</label>
+          <select class="form-control" id="paketLayanan">
+            <option value="KUSUMA 1">KUSUMA 1</option>
+            <option value="KUSUMA 2">KUSUMA 2</option>
+            <option value="KUSUMA 3">KUSUMA 3</option>
+            <option value="METRO 10">METRO 10</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pppoeUser">PPPoE User</label>
+          <input class="form-control" id="pppoeUser" type="text"
+                 placeholder="e.g. 2010102081" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pppoePass">PPPoE Pass</label>
+          <input class="form-control" id="pppoePass" type="text"
+                 placeholder="e.g. 150326" autocomplete="off"/>
+        </div>
+      </div>
+
+      <!-- Validation Message -->
+      <div id="validationMsg" class="validation-msg hidden"></div>
+
+      <!-- Generate Button -->
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-generate" id="btnGenerate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6
+                     M2 11.5a10 10 0 0 1 18.8-4.3
+                     M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+          Generate Script
+        </button>
+
+        <button class="btn-quick-fill" id="btnQuickRename" title="Ganti Nama & Description cepat">✎ Ganti Nama &amp; Desc</button>
+        <button class="btn-quick-fill" id="btnNameOnly" title="Ganti Name saja">✎ Nama Saja</button>
+      </div>
+
+      <div class="migration-panel">
+        <div class="migration-title-row">
+          <div class="migration-title">Maintenance &amp; Migrasi ONU</div>
+          <button type="button" class="migration-toggle" id="toggleMigration" aria-expanded="false">Buka</button>
+        </div>
+        <div class="migration-body hidden" id="migrationBody">
+          <div class="migration-grid">
+          <div class="form-group">
+            <label class="form-label" for="migrationAction">Operasi</label>
+            <select class="form-control" id="migrationAction">
+              <option value="delete">Hapus ONU</option>
+              <option value="swap-sn">Ganti SN</option>
+              <option value="move-port">Pindah Port</option>
+              <option value="change-vlan">Ganti VLAN / Paket</option>
+              <option value="reset">Reset Modem</option>
+            </select>
+          </div>
+          <div class="form-group migration-new-interface" id="migration-new-interface">
+            <label class="form-label" for="migrationInterface">Interface Baru</label>
+            <input class="form-control" id="migrationInterface" placeholder="e.g. 1/3/17" autocomplete="off"/>
+          </div>
+          <div class="form-group migration-new-onu" id="migration-new-onu">
+            <label class="form-label" for="migrationOnuId">ONU ID Baru</label>
+            <input class="form-control" id="migrationOnuId" placeholder="e.g. 10" autocomplete="off"/>
+          </div>
+          <div class="form-group migration-new-sn" id="migration-new-sn">
+            <label class="form-label" for="migrationSn">SN Baru</label>
+            <input class="form-control text-upper" id="migrationSn" placeholder="e.g. HWTCDF6AE2C8" autocomplete="off"/>
+          </div>
+          <div class="form-group migration-vlan" id="migration-vlan">
+            <label class="form-label" for="migrationVlan">VLAN Baru</label>
+            <input class="form-control" id="migrationVlan" type="number" min="1" max="4094" placeholder="e.g. 100" autocomplete="off"/>
+          </div>
+          <div class="form-group migration-package" id="migration-package">
+            <label class="form-label" for="migrationPackage">Paket PPPoE</label>
+            <select class="form-control" id="migrationPackage">
+              <option value="KUSUMA 1">KUSUMA 1</option>
+              <option value="KUSUMA 2">KUSUMA 2</option>
+              <option value="KUSUMA 3">KUSUMA 3</option>
+              <option value="METRO 10">METRO 10</option>
+            </select>
+          </div>
+          </div>
+          <div class="migration-actions">
+            <button type="button" class="btn-quick-fill" id="btnGenerateMigration">Generate Operasi</button>
+            <button type="button" class="btn-db-action use" id="btnCopyMigration">Copy Script</button>
+          </div>
+          <pre class="migration-output hidden" id="migrationOutput"></pre>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /KOLOM KIRI -->
+
+  <!-- ═══ KOLOM TENGAH: SCRIPT OUTPUT ═══ -->
+  <div class="output-col">
+
+    <!-- Box 1: OLT ZTE -->
+    <div class="script-box">
+      <div class="script-box-header">
+        <div class="script-box-title">
+          <span class="dot dot-olt"></span>
+          Script OLT (ZTE)
+        </div>
+        <div class="script-box-actions">
+          <button class="btn-export" id="exportOlt" title="Download .txt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="btn-copy" id="copyOlt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <pre class="script-content" id="outputOlt"><span class="script-placeholder">// Isi form dan klik "Generate Script" untuk menampilkan script OLT ZTE...</span></pre>
+    </div>
+
+    <!-- Box 2: Mikrotik PPPoE Secret -->
+    <div class="script-box">
+      <div class="script-box-header">
+        <div class="script-box-title">
+          <span class="dot dot-mkt"></span>
+          Script Mikrotik (PPPoE Secret)
+        </div>
+        <div class="script-box-actions">
+          <button class="btn-export" id="exportMkt" title="Download .txt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <button class="btn-copy" id="copyMkt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <pre class="script-content mkt" id="outputMkt"><span class="script-placeholder">// Script Mikrotik PPPoE Secret akan muncul di sini...</span></pre>
+    </div>
+
+    <div class="verification-box">
+      <div class="verification-header">
+        <div class="script-box-title"><span class="dot dot-olt"></span>Command Verifikasi</div>
+        <button class="btn-copy" id="copyVerification" type="button">Copy Semua</button>
+      </div>
+      <div class="verification-list" id="verificationList">
+        <div class="script-placeholder">// Generate script terlebih dahulu untuk menampilkan command verifikasi...</div>
+      </div>
+    </div>
+
+    <div class="workflow-box">
+      <div class="workflow-header">
+        <div class="script-box-title"><span class="dot dot-mkt"></span>Workflow Provisioning</div>
+        <button class="btn-quick-fill" id="btnWorkflowSaved" type="button">Simpan Hasil</button>
+      </div>
+      <div class="workflow-steps" id="workflowSteps">
+        <div class="workflow-step" data-step="1"><span>1</span><b>Register ONU</b></div>
+        <div class="workflow-step" data-step="2"><span>2</span><b>Konfigurasi Service</b></div>
+        <div class="workflow-step" data-step="3"><span>3</span><b>Konfigurasi WAN</b></div>
+        <div class="workflow-step" data-step="4"><span>4</span><b>Verifikasi</b></div>
+        <div class="workflow-step" data-step="5"><span>5</span><b>Simpan Hasil</b></div>
+      </div>
+      <div class="workflow-status" id="workflowStatus">Belum ada konfigurasi yang dibuat.</div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="history-box hidden" id="historyBox">
+      <div class="history-header">
+        <div class="history-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          History Script
+          <span class="history-badge" id="historyCount">0</span>
+        </div>
+        <button class="btn-clear-history" id="btnClearHistory" title="Hapus semua history">Hapus Semua</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+  </div><!-- /KOLOM TENGAH -->
+
+  <!-- ═══ KOLOM KANAN: COMMAND HUB ═══ -->
+  <div class="cmd-hub">
+    <div class="cmd-hub-header">
+      <div class="cmd-hub-title">&gt; COMMAND HUB</div>
+      <div class="badge-toggle">C300/C320</div>
+    </div>
+    <!-- Search Command Hub -->
+    <div class="cmd-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="cmdSearch" class="cmd-search" placeholder="Cari command..."/>
+    </div>
+    <div class="cmd-list" id="cmdList">
+      <!-- Populated by app.js -->
+    </div>
+  </div><!-- /KOLOM KANAN -->
+
+</div><!-- /TAB UNB -->
+
+<!-- ════════════════════════════════════
+     TAB PANEL: FTTH
+════════════════════════════════════ -->
+<div id="panelFtth" class="tab-panel hidden">
+  <div class="ftth-shell">
+
+    <!-- Heading -->
+    <div class="ftth-heading">
+      <div>
+        <div class="eyebrow">FTTH / DATA TEKNIS</div>
+        <h1>FTTH</h1>
+        <p>Kelola data jaringan OTB, ODC, ODP, dan peta titik teknis.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="btnResetFtthData" title="Hapus semua data FTTH dan kembali ke data bawaan"
+          style="border:1px solid #e94b5f;border-radius:4px;background:#fff;color:#e94b5f;cursor:pointer;font-size:10px;padding:6px 10px;">
+          ↺ Reset Data Default
+        </button>
+        <div class="ftth-status"><span class="status-dot"></span> Sistem validasi siap</div>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <nav class="ftth-menu" aria-label="Menu FTTH">
+      <button class="ftth-menu-item active" data-ftth-view="odp">ODP</button>
+      <button class="ftth-menu-item"        data-ftth-view="odc">ODC</button>
+      <button class="ftth-menu-item"        data-ftth-view="otb">OTB</button>
+      <button class="ftth-menu-item"        data-ftth-view="map">Map</button>
+      <button class="ftth-menu-item"        data-ftth-view="status">Status Validasi</button>
+    </nav>
+
+    <!-- ─── Panel: ODP ─── -->
+    <section class="ftth-data-view active" data-ftth-panel="odp">
+      <div class="ftth-data-title">
+        <h2>ODP</h2>
+        <div class="ftth-title-actions">
+          <label class="btn-import-small" for="ftthImportOdp">Import Excel</label>
+          <input class="hidden" id="ftthImportOdp" type="file" accept=".xlsx,.xls,.csv"/>
+          <button class="btn-export-small" data-ftth-export="odp">Export Excel</button>
+          <button class="btn-primary-small">+ Tambah ODP</button>
+        </div>
+      </div>
+      <!-- Stats bar ODP -->
+      <div class="ftth-stats-bar" id="ftthStatsOdp"></div>
+      <div class="ftth-filters">
+        <select><option>--Pilih Kabupaten--</option><option>Tulungagung</option></select>
+        <select><option>Kecamatan</option></select>
+        <select><option>Kelurahan/Desa</option></select>
+        <button class="btn-cyan">Reset Filter</button>
+        <!-- Filter status valid/belum -->
+        <select id="ftthStatusFilterOdp" class="ftth-status-filter">
+          <option value="all">Semua Status</option>
+          <option value="valid">✓ Valid</option>
+          <option value="check">⚠ Belum Valid</option>
+        </select>
+        <input class="ftth-list-search" placeholder="Search..."/>
+      </div>
+      <!-- Bulk-action toolbar (hidden until rows are selected) -->
+      <div class="ftth-bulk-bar" id="ftthBulkBarOdp">
+        <span id="ftthBulkCountOdp">0 baris dipilih</span>
+        <button class="btn-bulk-delete" data-ftth-bulk-delete="odp">Hapus Terpilih</button>
+      </div>
+      <div class="ftth-table-scroll">
+        <table class="ftth-list-table" data-ftth-table="odp">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="ftthSelectAllOdp" title="Pilih semua"/></th>
+              <th>Nama</th><th>Status</th><th>Pelanggan</th><th>Port Idle</th><th>Splitter</th>
+              <th>Redaman</th><th>Keterangan</th><th>Alamat</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ftthOdpRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Panel: ODC ─── -->
+    <section class="ftth-data-view" data-ftth-panel="odc">
+      <div class="ftth-data-title">
+        <h2>ODC</h2>
+        <div class="ftth-title-actions">
+          <label class="btn-import-small" for="ftthImportOdc">Import Excel</label>
+          <input class="hidden" id="ftthImportOdc" type="file" accept=".xlsx,.xls,.csv"/>
+          <button class="btn-export-small" data-ftth-export="odc">Export Excel</button>
+          <button class="btn-primary-small">+ Tambah ODC</button>
+        </div>
+      </div>
+      <!-- Stats bar ODC -->
+      <div class="ftth-stats-bar" id="ftthStatsOdc"></div>
+      <div class="ftth-filters">
+        <!-- Filter status valid/belum -->
+        <select id="ftthStatusFilterOdc" class="ftth-status-filter">
+          <option value="all">Semua Status</option>
+          <option value="valid">✓ Valid</option>
+          <option value="check">⚠ Belum Valid</option>
+        </select>
+        <input class="ftth-list-search" placeholder="Search..."/>
+      </div>
+      <!-- Bulk-action toolbar (hidden until rows are selected) -->
+      <div class="ftth-bulk-bar" id="ftthBulkBarOdc">
+        <span id="ftthBulkCountOdc">0 baris dipilih</span>
+        <button class="btn-bulk-delete" data-ftth-bulk-delete="odc">Hapus Terpilih</button>
+      </div>
+      <div class="ftth-table-scroll">
+        <table class="ftth-list-table" data-ftth-table="odc">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="ftthSelectAllOdc" title="Pilih semua"/></th>
+              <th>Nama</th><th>Status</th><th>OLT</th><th>Interface</th><th>Splitter</th>
+              <th>Redaman</th><th>ODP</th><th>Pelanggan</th><th>Keterangan</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ftthOdcRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Panel: OTB ─── -->
+    <section class="ftth-data-view" data-ftth-panel="otb">
+      <div class="ftth-data-title">
+        <h2>OTB</h2>
+        <div class="ftth-title-actions">
+          <label class="btn-import-small" for="ftthImportOtb">Import Excel</label>
+          <input class="hidden" id="ftthImportOtb" type="file" accept=".xlsx,.xls,.csv"/>
+          <button class="btn-export-small" data-ftth-export="otb">Export Excel</button>
+          <button class="btn-primary-small">+ Tambah OTB</button>
+        </div>
+      </div>
+      <div class="ftth-filters">
+        <input class="ftth-list-search" placeholder="Search..."/>
+      </div>
+      <!-- Bulk-action toolbar (hidden until rows are selected) -->
+      <div class="ftth-bulk-bar" id="ftthBulkBarOtb">
+        <span id="ftthBulkCountOtb">0 baris dipilih</span>
+        <button class="btn-bulk-delete" data-ftth-bulk-delete="otb">Hapus Terpilih</button>
+      </div>
+      <div class="ftth-table-scroll">
+        <table class="ftth-list-table" data-ftth-table="otb">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="ftthSelectAllOtb" title="Pilih semua"/></th>
+              <th>Nama</th><th>Port</th><th>PoP</th><th>Keterangan</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ftthOtbRows"></tbody>
+        </table>
+      </div>
+      <div class="ftth-port-card">
+        <strong>Pilih OTB</strong>
+        <select><option>OTB BJI-01</option></select>
+        <div class="ftth-port-grid" id="ftthPortGrid"></div>
+      </div>
+    </section>
+
+    <!-- ─── Panel: Map ─── -->
+    <section class="ftth-data-view" data-ftth-panel="map">
+      <div class="ftth-map-toolbar">
+        <div>
+          <h2>Map</h2>
+          <span>Titik koordinat jaringan FTTH</span>
+        </div>
+        <div class="ftth-search">
+          <label for="ftthSearch">Cari koordinat / nama</label>
+          <div class="ftth-search-row">
+            <input id="ftthSearch" type="search"
+                   placeholder="Masukkan koordinat, contoh: -8.120969, 111.934425"/>
+            <button id="btnFtthSearch">Cari</button>
+          </div>
+        </div>
+      </div>
+      <div class="ftth-route-toolbar">
+        <select id="ftthMapFilter" class="ftth-map-filter">
+          <option value="all">Semua Titik (ODP/ODC/OTB)</option>
+          <option value="odp">Hanya ODP</option>
+          <option value="odc">Hanya ODC</option>
+          <option value="otb">Hanya OTB</option>
+        </select>
+        <strong>Rute Jaringan</strong>
+        <select id="ftthRouteOdp"><option value="">Pilih Titik Awal (ODP/ODC)</option></select>
+        <select id="ftthRouteOdc"><option value="">Pilih Tujuan (ODC)</option></select>
+        <button id="btnStartRoute" class="btn-route">Gambar manual</button>
+        <button id="btnSaveRoute"  class="btn-route primary" disabled>Simpan jalur</button>
+        <button id="btnValidateData" class="btn-route">Validasi Data</button>
+      </div>
+      <div class="ftth-map-panel" id="ftthMap">
+        <div class="map-grid-lines"></div>
+        <div class="map-road road-one"></div>
+        <div class="map-road road-two"></div>
+        <div class="map-road road-three"></div>
+        <div class="map-area-label">AREA JARINGAN FTTH</div>
+        <div class="map-legend">
+          <span><i class="legend-dot blue"></i> OTB</span>
+          <span><i class="legend-dot orange"></i> ODC</span>
+          <span><i class="legend-dot green"></i> ODP</span>
+          <span><i class="route-legend"></i> Jalur kabel</span>
+        </div>
+        <div class="map-pin pin-one   blue"><b>OTB-01</b></div>
+        <div class="map-pin pin-two   orange"><b>ODC-01</b></div>
+        <div class="map-pin pin-three green"><b>ODP-01</b></div>
+        <div class="map-pin pin-four  green"><b>ODP-02</b></div>
+        <div class="map-zoom">
+          <button type="button">+</button>
+          <button type="button">−</button>
+        </div>
+      </div>
+      <div class="ftth-route-list" id="ftthRouteList"></div>
+    </section>
+
+    <!-- ─── Panel: Status Validasi ─── -->
+    <section class="ftth-data-view" data-ftth-panel="status">
+      <div class="ftth-data-title">
+        <h2>Status Validasi ODP &amp; ODC</h2>
+        <div class="ftth-title-actions">
+          <button class="btn-export-small" id="btnExportValidasi">Export Rekap</button>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="ftth-valid-summary" id="ftthValidSummary">
+        <!-- Filled by JS -->
+      </div>
+
+      <!-- Filter bar -->
+      <div class="ftth-valid-filterbar">
+        <div class="ftth-valid-filter-group">
+          <label>Tipe</label>
+          <select id="ftthValidFilterType">
+            <option value="all">ODP + ODC</option>
+            <option value="odp">Hanya ODP</option>
+            <option value="odc">Hanya ODC</option>
+          </select>
+        </div>
+        <div class="ftth-valid-filter-group">
+          <label>Status</label>
+          <select id="ftthValidFilterStatus">
+            <option value="all">Semua Status</option>
+            <option value="valid">✓ Valid</option>
+            <option value="check">⚠ Belum Valid</option>
+          </select>
+        </div>
+        <div class="ftth-valid-filter-group">
+          <label>Cari</label>
+          <input type="text" id="ftthValidSearch" placeholder="Cari nama..." class="ftth-valid-search-input"/>
+        </div>
+        <button class="btn-cyan" id="btnRefreshValidasi">↺ Refresh</button>
+      </div>
+
+      <!-- List -->
+      <div class="ftth-table-scroll">
+        <table class="ftth-list-table ftth-valid-table" id="ftthValidTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipe</th>
+              <th>Nama</th>
+              <th>Status</th>
+              <th>OLT / ODC Induk</th>
+              <th>Pelanggan</th>
+              <th>Port Idle</th>
+              <th>Redaman</th>
+              <th>Keterangan</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ftthValidRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div id="ftthModal" class="qf-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ftthModalTitle">
+  <div class="qf-modal ftth-modal">
+    <div class="qf-header"><div class="qf-header-title" id="ftthModalTitle">Tambah ODP</div><button class="qf-close" id="ftthModalClose" aria-label="Tutup">&times;</button></div>
+    <div class="qf-panel"><form id="ftthForm" onsubmit="return false;"><input type="hidden" id="ftthEditIndex"/><input type="hidden" id="ftthEditType"/>
+      <div class="ftth-form-grid" id="ftthOdpForm"><div><label class="form-label">Nama ODP</label><input class="form-control" id="ftthOdpName" placeholder="Nama" required/></div><div><label class="form-label">Alamat</label><select class="form-control" id="ftthOdpProvince"><option>Provinsi</option><option>Jawa Timur</option></select></div><div><label class="form-label">Splitter</label><input class="form-control" id="ftthOdpSplitter" placeholder="splitter"/></div><div><label class="form-label">Kabupaten/Kota</label><select class="form-control" id="ftthOdpRegency"><option>Kabupaten/Kota</option><option>Tulungagung</option></select></div><div><label class="form-label">Redaman</label><input class="form-control" id="ftthOdpAttenuation" placeholder="redaman"/></div><div><label class="form-label">Kecamatan</label><select class="form-control" id="ftthOdpDistrict"><option>Kecamatan</option></select></div><div><label class="form-label">ODC</label><select class="form-control" id="ftthOdpOdc" required><option value="">Pilih ODC</option></select></div><div><label class="form-label">Kelurahan/Desa</label><select class="form-control" id="ftthOdpVillage"><option>Kelurahan/Desa</option></select></div><div><label class="form-label">Keterangan</label><textarea class="form-control" id="ftthOdpDescription" placeholder="Keterangan"></textarea></div><div><label class="form-label">Koordinat</label><input class="form-control" id="ftthOdpCoordinates" placeholder="lat,lng" required/></div></div>
+      <div class="ftth-form-grid ftth-odc-form hidden" id="ftthOdcForm"><div><label class="form-label">Nama ODC</label><input class="form-control" id="ftthOdcName" placeholder="Nama" required/></div><div><label class="form-label">Keterangan</label><textarea class="form-control" id="ftthOdcDescription" placeholder="Keterangan"></textarea></div><div><label class="form-label">OLT</label><select class="form-control" id="ftthOdcOlt"><option>--Pilih OLT--</option><option>OLT-BJI_UNB</option></select></div><div><label class="form-label">Koordinat</label><input class="form-control" id="ftthOdcCoordinates" placeholder="lat,lng" required/></div><div><label class="form-label">Interface</label><input class="form-control" id="ftthOdcInterface" placeholder="interface"/></div><div><label class="form-label">Splitter</label><input class="form-control" id="ftthOdcSplitter" placeholder="splitter"/></div><div><label class="form-label">Redaman</label><input class="form-control" id="ftthOdcAttenuation" placeholder="redaman"/></div></div>
+      <div class="ftth-form-grid ftth-otb-form hidden" id="ftthOtbForm"><div><label class="form-label">Nama OTB</label><input class="form-control" id="ftthOtbName" placeholder="Nama" required/></div><div><label class="form-label">Kolom</label><select class="form-control"><option>--Pilih Kolom--</option><option>1</option><option>2</option></select></div><div><label class="form-label">Baris</label><select class="form-control"><option>--Pilih Baris--</option><option>1</option><option>2</option></select></div><div><label class="form-label">Port</label><input class="form-control" id="ftthOtbPort" placeholder="port"/></div><div><label class="form-label">PoP</label><select class="form-control"><option>--Pilih PoP--</option><option>PoP Beji</option></select></div><div><label class="form-label">Koordinat</label><input class="form-control" id="ftthOtbCoordinates" placeholder="lat,lng" required/></div><div><label class="form-label">Keterangan</label><textarea class="form-control" id="ftthOtbDescription" placeholder="Keterangan"></textarea></div></div>
+    </form></div><div class="qf-footer"><button class="qf-btn-cancel" id="ftthModalCancel">Tutup</button><button class="qf-btn-submit" id="ftthSubmit">Simpan</button></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB PANEL: TOOLS
+════════════════════════════════════ -->
+<div id="panelTools" class="tab-panel hidden">
+  <div class="tools-grid">
+
+    <!-- TOOL 1: Kalkulator Redaman FO -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Kalkulator Redaman FO
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Estimasi total redaman dan Rx Power ONT berdasarkan parameter kabel fiber optik.</p>
+        <div class="tool-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="foLength">Panjang Kabel (km)</label>
+            <input class="form-control" id="foLength" type="number" step="0.1" min="0" placeholder="e.g. 2.5"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foSplice">Jumlah Splice</label>
+            <input class="form-control" id="foSplice" type="number" min="0" placeholder="e.g. 4"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foKonektor">Jumlah Konektor</label>
+            <input class="form-control" id="foKonektor" type="number" min="0" placeholder="e.g. 2"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foSplitter">Splitter (dB)</label>
+            <select class="form-control" id="foSplitter">
+              <option value="3.5">1:2 (~3.5 dB)</option>
+              <option value="7.0">1:4 (~7.0 dB)</option>
+              <option value="10.5" selected>1:8 (~10.5 dB)</option>
+              <option value="13.5">1:16 (~13.5 dB)</option>
+              <option value="16.5">1:32 (~16.5 dB)</option>
+              <option value="19.5">1:64 (~19.5 dB)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="foTxPower">Tx Power OLT (dBm)</label>
+            <input class="form-control" id="foTxPower" type="number" step="0.1" value="4" placeholder="e.g. 4"/>
+          </div>
+        </div>
+        <button class="btn-generate mt-10" id="btnCalcFO">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Hitung Redaman
+        </button>
+        <div id="foResult" class="fo-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 2: Konverter Subnet / CIDR -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="9" height="9" rx="1"/>
+          <rect x="13" y="2" width="9" height="9" rx="1"/>
+          <rect x="2" y="13" width="9" height="9" rx="1"/>
+          <path d="M17 17h4m-2-2v4"/>
+        </svg>
+        Konverter Subnet / CIDR
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Hitung Network, Broadcast, Range IP, dan jumlah host dari CIDR notation.</p>
+        <div class="form-group">
+          <label class="form-label" for="subnetInput">IP Address / CIDR</label>
+          <input class="form-control" id="subnetInput" type="text"
+                 placeholder="e.g. 192.168.10.0/24" autocomplete="off"/>
+        </div>
+        <button class="btn-generate mt-6" id="btnCalcSubnet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Hitung Subnet
+        </button>
+        <div id="subnetResult" class="subnet-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 3: Mikrotik Script Generator -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M8 12h8M12 8v8"/>
+        </svg>
+        Mikrotik Script Generator
+      </div>
+      <div class="tool-card-body">
+        <p class="tool-desc">Generate script Mikrotik: Simple Queue, IP Pool, Static IP, dan Firewall NAT Masquerade.</p>
+
+        <!-- Sub-tabs -->
+        <div class="mkt-tabs">
+          <button class="mkt-tab active" data-mkt="queue">Simple Queue</button>
+          <button class="mkt-tab" data-mkt="pool">IP Pool</button>
+          <button class="mkt-tab" data-mkt="static">Static IP</button>
+          <button class="mkt-tab" data-mkt="nat">NAT Masquerade</button>
+        </div>
+
+        <!-- Panel: Simple Queue -->
+        <div class="mkt-panel" id="mktPanelQueue">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mqName">Nama Queue</label>
+              <input class="form-control" id="mqName" placeholder="e.g. 2010102081" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqTarget">Target IP</label>
+              <input class="form-control" id="mqTarget" placeholder="e.g. 192.168.1.10/32" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqUp">Max Upload</label>
+              <input class="form-control" id="mqUp" placeholder="e.g. 10M" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqDown">Max Download</label>
+              <input class="form-control" id="mqDown" placeholder="e.g. 10M" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mqComment">Komentar</label>
+              <input class="form-control" id="mqComment" placeholder="e.g. NAMA PELANGGAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate mt-10" id="btnMktQueue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: IP Pool -->
+        <div class="mkt-panel hidden" id="mktPanelPool">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mpName">Nama Pool</label>
+              <input class="form-control" id="mpName" placeholder="e.g. pool-kusuma1" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mpRange">Range IP</label>
+              <input class="form-control" id="mpRange" placeholder="e.g. 10.10.1.2-10.10.1.254" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate mt-10" id="btnMktPool">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: Static IP -->
+        <div class="mkt-panel hidden" id="mktPanelStatic">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="msUser">PPPoE User</label>
+              <input class="form-control" id="msUser" placeholder="e.g. 2010102081" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msIp">IP Address</label>
+              <input class="form-control" id="msIp" placeholder="e.g. 10.10.1.5" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msProfile">Profile PPPoE</label>
+              <input class="form-control" id="msProfile" placeholder="e.g. KUSUMA 1" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="msComment">Komentar</label>
+              <input class="form-control" id="msComment" placeholder="e.g. NAMA PELANGGAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate mt-10" id="btnMktStatic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Panel: NAT Masquerade -->
+        <div class="mkt-panel hidden" id="mktPanelNat">
+          <div class="tool-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="mnChain">Chain</label>
+              <select class="form-control" id="mnChain">
+                <option value="srcnat">srcnat</option>
+                <option value="dstnat">dstnat</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnOutIface">Out Interface</label>
+              <input class="form-control" id="mnOutIface" placeholder="e.g. ether1-WAN" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnSrcAddr">Src Address (opsional)</label>
+              <input class="form-control" id="mnSrcAddr" placeholder="e.g. 192.168.0.0/24" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mnComment">Komentar</label>
+              <input class="form-control" id="mnComment" placeholder="e.g. NAT LAN ke WAN" autocomplete="off"/>
+            </div>
+          </div>
+          <button class="btn-generate mt-10" id="btnMktNat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-sm"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Generate
+          </button>
+        </div>
+
+        <!-- Output -->
+        <div id="mktScriptResult" class="mkt-script-result hidden">
+          <div class="mkt-script-result-header">
+            <span>Generated Script</span>
+            <button class="btn-copy" id="copyMktTool">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre class="mkt-script-output" id="mktScriptOutput"></pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div><!-- /TAB TOOLS -->
+
+<!-- ════════════════════════════════════
+     TAB PANEL: PELANGGAN
+════════════════════════════════════ -->
+<div id="panelPelanggan" class="tab-panel hidden">
+  <div class="card">
+    <div class="card-header">Database Pelanggan</div>
+    <div class="card-body">
+      <!-- Toolbar -->
+      <div class="db-toolbar">
+        <div class="search-box-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="custSearch" placeholder="Cari pelanggan berdasarkan ID, Nama, SN, atau PPPoE..." class="form-control"/>
+        </div>
+        <div class="db-actions">
+          <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" class="hidden"/>
+          <button class="btn-quick-fill" id="btnImportCsv">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Import CSV / Excel
+          </button>
+          <button class="btn-generate mt-0" id="btnTambahCust">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Baru
+          </button>
+        </div>
+      </div>
+
+      <div class="bulk-config-panel">
+        <div class="bulk-config-header">
+          <div>
+            <div class="bulk-config-title">Bulk Configuration ONU</div>
+            <div class="bulk-config-sub">Pilih pelanggan, isi port OLT, lalu tempel hasil <code>show gpon onu uncfg</code>.</div>
+          </div>
+          <span class="bulk-selected-count" id="bulkSelectedCount">0 dipilih</span>
+        </div>
+        <div class="bulk-config-grid">
+          <div class="form-group">
+            <label class="form-label" for="bulkInterfaceOlt">Interface OLT</label>
+            <input class="form-control" id="bulkInterfaceOlt" placeholder="e.g. 1/3/16" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bulkConfigType">Template</label>
+            <select class="form-control" id="bulkConfigType">
+              <option value="v100">UNB V100</option>
+              <option value="v1600">UNB V1600</option>
+              <option value="v1501">UNB V1501</option>
+              <option value="v602">UNB V602</option>
+              <option value="v903">UNB V903</option>
+              <option value="ucd_v511">UCD Standard</option>
+              <option value="ucd_bridge514">UCD Bridge</option>
+            </select>
+          </div>
+          <div class="form-group bulk-onu-input">
+            <label class="form-label" for="bulkUncfgText">ONU kosong / unconfigured</label>
+            <textarea class="form-control" id="bulkUncfgText" rows="2" placeholder="Paste output show gpon onu uncfg..."></textarea>
+          </div>
+        </div>
+        <div class="bulk-config-actions">
+          <button class="btn-db-action use" id="btnBulkAssign">Alokasikan ONU Otomatis</button>
+          <button class="btn-generate mt-0" id="btnBulkGenerate">Generate Bulk Script</button>
+          <button class="btn-quick-fill" id="btnBulkExport" title="Download script bulk">Download .txt</button>
+        </div>
+        <div class="bulk-status" id="bulkStatus"></div>
+        <pre class="bulk-output hidden" id="bulkOutput"></pre>
+      </div>
+
+      <!-- Database Table -->
+      <div class="db-table-container">
+        <table class="db-table">
+          <thead>
+            <tr>
+                <th><input type="checkbox" id="bulkSelectAll" title="Pilih semua pelanggan"/></th>
+              <th>ID</th>
+              <th>Nama</th>
+              <th>Interface OLT</th>
+              <th>ONU ID</th>
+              <th>SN</th>
+              <th>PPPoE User</th>
+              <th>Paket</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="custTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+        <div class="db-empty-state hidden" id="dbEmptyState">
+          Belum ada data pelanggan. Silakan import CSV atau tambah manual.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL TAMBAH/EDIT PELANGGAN
+════════════════════════════════════ -->
+<div id="custModal" class="qf-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="custTitle">
+  <div class="qf-modal">
+    <div class="qf-header">
+      <div class="qf-header-title" id="custTitle">Tambah Pelanggan</div>
+      <button class="qf-close" id="custClose" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="qf-panel">
+      <form id="custForm" onsubmit="return false;">
+        <input type="hidden" id="custIndex"/>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="c_idPelanggan">ID Pelanggan</label>
+            <input class="form-control" id="c_idPelanggan" required autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c_namaPelanggan">Nama Pelanggan</label>
+            <input class="form-control text-upper" id="c_namaPelanggan" required autocomplete="off"/>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="c_interfaceOlt">Interface OLT</label>
+            <input class="form-control" id="c_interfaceOlt" placeholder="e.g. 1/4/2" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c_onuId">ONU ID</label>
+            <input class="form-control" id="c_onuId" placeholder="e.g. 88" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="c_sn">Serial Number (SN)</label>
+            <input class="form-control text-upper" id="c_sn" placeholder="e.g. HWTCDF67C578" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c_macAddr">MAC Address</label>
+            <input class="form-control text-lower" id="c_macAddr" placeholder="e.g. c4eb.ff21.c531" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="form-group">
+            <label class="form-label" for="c_pppoeUser">PPPoE User</label>
+            <input class="form-control" id="c_pppoeUser" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c_pppoePass">PPPoE Pass</label>
+            <input class="form-control" id="c_pppoePass" autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c_paketLayanan">Paket Layanan</label>
+            <select class="form-control" id="c_paketLayanan">
+              <option value="KUSUMA 1">KUSUMA 1</option>
+              <option value="KUSUMA 2">KUSUMA 2</option>
+              <option value="KUSUMA 3">KUSUMA 3</option>
+              <option value="METRO 10">METRO 10</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="qf-footer">
+      <button class="qf-btn-cancel" id="custCancel">Batal</button>
+      <button class="qf-btn-submit" id="custSubmit">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL QUICK FILL
+════════════════════════════════════ -->
+<div id="qfModal" class="qf-overlay hidden" role="dialog"
+     aria-modal="true" aria-labelledby="qfTitle">
+  <div class="qf-modal">
+
+    <!-- Header -->
+    <div class="qf-header">
+      <div class="qf-header-title" id="qfTitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Quick Fill
+      </div>
+      <button class="qf-close" id="qfClose" aria-label="Tutup">&times;</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="qf-tabs">
+      <button class="qf-tab" id="tabKoneksi">Detail Koneksi</button>
+      <button class="qf-tab active" id="tabOnu">Detail ONU</button>
+      <button class="qf-tab" id="tabBebas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" class="icon-xs">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Teks Bebas
+      </button>
+    </div>
+
+    <!-- Panel: Detail Koneksi -->
+    <div class="qf-panel hidden" id="panelKoneksi">
+      <p class="qf-desc">
+        Paste teks dari halaman <strong>Detail Koneksi</strong> pelanggan di sistem internal.
+      </p>
+      <textarea class="qf-textarea" id="pasteKoneksi"
+        placeholder="Paste teks dari halaman Detail Koneksi di sini...
+
+Contoh:
+ID Pelanggan  : 2010102081
+Nama          : IR. BAMBANG SUTOMO
+PPPoE User    : 2010102081
+PPPoE Pass    : 150326"></textarea>
+    </div>
+
+    <!-- Panel: Detail ONU -->
+    <div class="qf-panel" id="panelOnu">
+      <p class="qf-desc">
+        Paste teks dari halaman <strong>Detail ONU</strong> di sistem internal.
+      </p>
+      <textarea class="qf-textarea" id="pasteOnu"
+        placeholder="Paste teks dari halaman Detail ONU di sini...
+
+Contoh:
+ONU interface:	gpon-onu_1/3/16:10	Config state:	success
+Name:	2010100005	Serial number:	HWTCDF6AE2C8
+Type:	ALL-ONT	Description:	2010100005 - HADI PURWANTO"></textarea>
+    </div>
+
+    <!-- Panel: Teks Bebas (Multi-format) -->
+    <div class="qf-panel hidden" id="panelBebas">
+      <div class="qf-bebas-header">
+        <p class="qf-desc no-margin">
+          Paste teks dari <strong>sumber apapun</strong> — Excel/CSV, tabel HTML, chat WhatsApp, atau format billing apapun. Parser akan mendeteksi format secara otomatis.
+        </p>
+        <!-- Format Badge -->
+        <div class="qf-format-badge hidden" id="qfFormatBadge">
+          <span class="qf-format-icon" id="qfFormatIcon"></span>
+          <span id="qfFormatLabel">—</span>
+        </div>
+      </div>
+
+      <!-- Format Hints -->
+      <div class="qf-format-hints">
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-csv">CSV</span>
+          <span>2010102081,IR. BAMBANG,2010102081,150326,1/4/2,88,HWTC...</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-table">TABLE</span>
+          <span>ID&#9;Nama&#9;User&#9;Pass&#9;Interface&#9;ONUID&#9;SN</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-chat">CHAT</span>
+          <span>*ID:* 2010102081 *Nama:* BAMBANG *SN:* HWTC...</span>
+        </div>
+        <div class="qf-hint-item">
+          <span class="qf-hint-chip qf-chip-kv">KEY:VAL</span>
+          <span>ID=2010102081 | Nama=BAMBANG | SN=HWTCDF67C578</span>
+        </div>
+      </div>
+
+      <textarea class="qf-textarea qf-textarea-bebas" id="pasteBebas"
+        placeholder="Paste teks dari sumber manapun di sini...&#10;&#10;Format yang didukung:&#10;• Excel / CSV  (koma, titik koma, atau tab)&#10;• Tabel HTML   (copy dari browser)&#10;• Chat/WhatsApp (*bold label:* nilai)&#10;• Key=Value    (format billing / export apapun)&#10;• Label : Nilai (format laporan biasa)"></textarea>
+
+      <!-- Preview hasil parsing -->
+      <div class="qf-preview hidden" id="qfPreview">
+        <div class="qf-preview-title">Preview hasil deteksi:</div>
+        <div class="qf-preview-grid" id="qfPreviewGrid"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="qf-footer">
+      <button class="qf-btn-cancel" id="qfCancel">Batal</button>
+      <button class="qf-btn-submit" id="qfSubmit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Isi Form Otomatis
+      </button>
+    </div>
+
+  </div>
+</div><!-- /MODAL -->
+
+<!-- Toast Container -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Footer -->
+<footer class="app-footer">
+  Boyolangu NOC Administrator &mdash; GPON UNB UPAZNET &copy; 2025
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
