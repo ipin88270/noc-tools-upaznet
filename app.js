@@ -4852,6 +4852,11 @@ async function initializeAppStorage() {
     else FTTH_POINTS.push(pt);
   });
 
+  // Default network points are trusted reference data and start as valid.
+  FTTH_POINTS.forEach(point => {
+    if ((point.type === 'odp' || point.type === 'odc') && !point.status) point.status = 'valid';
+  });
+
   // Persist seed data immediately so next load detects storage is set (not first run)
   await writeAppData('ftthPoints', FTTH_POINTS);
 
