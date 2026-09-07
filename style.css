@@ -185,6 +185,8 @@ option   { font-weight: 400; color: #1e293b; }
 
 .hidden { display: none; }
 
+body.storage-loading #panelFtth .ftth-shell { visibility: hidden; }
+
 .text-upper { text-transform: uppercase; }
 .text-lower { text-transform: lowercase; }
 

@@ -5,6 +5,8 @@
 
 'use strict';
 
+document.body.classList.add('storage-loading');
+
 /* ── SCRIPT TEMPLATES ─────────────────────────────────────── */
 const TEMPLATES = {
 
@@ -4924,5 +4926,7 @@ setWorkflowProgress(1, 0);
 renderCmdHub();
 renderHistory();
 renderCustomerTable();
-initializeAppStorage();
+initializeAppStorage().finally(() => {
+  document.body.classList.remove('storage-loading');
+});
 
