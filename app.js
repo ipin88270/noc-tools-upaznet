@@ -3648,14 +3648,6 @@ async function initializeAppStorage() {
     renderFtthTables();
     renderHistory();
     renderCustomerTable();
-    if (!cloudReadFailed) {
-      await Promise.all([
-        writeAppData('ftthPoints', FTTH_POINTS),
-        writeAppData('ftthRoutes', ftthRoutes),
-        writeAppData(HISTORY_KEY, historyCache),
-        writeAppData(DB_KEY, customerCache),
-      ]);
-    }
     return;
   }
 
@@ -3673,14 +3665,6 @@ async function initializeAppStorage() {
     renderFtthTables();
     renderHistory();
     renderCustomerTable();
-    if (!cloudReadFailed) {
-      await Promise.all([
-        writeAppData('ftthPoints', FTTH_POINTS),
-        writeAppData('ftthRoutes', ftthRoutes),
-        writeAppData(HISTORY_KEY, historyCache),
-        writeAppData(DB_KEY, customerCache),
-      ]);
-    }
     return;
   }
 
