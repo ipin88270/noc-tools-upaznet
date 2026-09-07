@@ -372,8 +372,8 @@ async function readAppData(key, fallback) {
   }
 }
 
-async function writeAppData(key, value, options = {}) {
-  if (key === 'ftthPoints' && Array.isArray(value) && value.length === 0 && !options.allowEmpty) {
+async function writeAppData(key, value) {
+  if (key === 'ftthPoints' && Array.isArray(value) && value.length === 0) {
     return true;
   }
   try {
@@ -2077,7 +2077,7 @@ $('btnResetFtthData')?.addEventListener('click', async () => {
     }
   }
   ftthRoutes = [];
-  await writeAppData('ftthPoints', FTTH_POINTS, { allowEmpty: true });
+  await writeAppData('ftthPoints', FTTH_POINTS);
   await writeAppData('ftthRoutes', ftthRoutes);
   populateOdcOptions();
   populateRouteOptions();
