@@ -1081,7 +1081,6 @@ const FTTH_POINTS = [
 ];
 let ftthMap;
 let ftthMapMarkers = [];
-let ftthLogicalLines = [];
 let ftthSearchMarker;
 let ftthTileLayer;
 let ftthRouteLayers = [];
@@ -1118,10 +1117,8 @@ function getMapMarkerPosition(point, duplicateIndex, duplicateCount) {
 function updateFtthMap(points, searchedCoordinates = null) {
   if (!ftthMap || !window.L) return;
 
-  // Clear existing markers and logical lines
+  // Clear existing markers
   ftthMapMarkers.forEach(marker => marker.remove());
-  ftthLogicalLines.forEach(line => line.remove());
-  ftthLogicalLines = [];
 
   if (ftthSearchMarker) { ftthMap.closePopup(); ftthSearchMarker.remove(); }
   document.querySelectorAll('#ftthMap .leaflet-popup').forEach(popup => popup.remove());
@@ -1164,19 +1161,6 @@ function updateFtthMap(points, searchedCoordinates = null) {
         `<strong>${point.name}</strong>${point.type.toUpperCase()} · ${point.coordinates}<br>` +
         `${point.capacity} · ${point.used}${locationNote}`
       );
-  });
-
-  // Draw logical ODP → ODC connections
-  points.forEach(point => {
-    if (point.type === 'odp' && point.odc) {
-      const odcPoint = points.find(p => p.type === 'odc' && p.name === point.odc);
-      if (odcPoint) {
-        const p1   = getPointPosition(point);
-        const p2   = getPointPosition(odcPoint);
-        const line = L.polyline([p1, p2], { color: '#22a06b', weight: 2, dashArray: '5 5', opacity: 0.6 }).addTo(ftthMap);
-        ftthLogicalLines.push(line);
-      }
-    }
   });
 
   // Pan/zoom to search result or first point
