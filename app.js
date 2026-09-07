@@ -1235,6 +1235,15 @@ async function generateRoutesForValidPoint(point) {
   }
 }
 
+async function generateAllMissingValidRoutes() {
+  const validOdps = FTTH_POINTS.filter(point => point.type === 'odp' && point.status === 'valid');
+  for (const odp of validOdps) {
+    const odc = FTTH_POINTS.find(point => point.type === 'odc' && point.name === odp.odc && point.status === 'valid');
+    if (!odc || ftthRoutes.some(route => route.odp === odp.name && route.odc === odc.name)) continue;
+    await generateNearestRoadRoute(odp.name, odc.name);
+  }
+}
+
 function generateSelectedRoute() {
   const odpName = $('ftthRouteOdp')?.value;
   const odcName = $('ftthRouteOdc')?.value;
@@ -1532,6 +1541,7 @@ function importFtthExcel(file, type) {
     populateRouteOptions();
     renderFtthTables();
     renderFtthValidation();
+    generateAllMissingValidRoutes();
 
     const parts = [];
     if (added)   parts.push(`${added} data baru ditambahkan`);
@@ -3655,6 +3665,7 @@ async function initializeAppStorage() {
     renderFtthTables();
     renderHistory();
     renderCustomerTable();
+    generateAllMissingValidRoutes();
     return;
   }
 
