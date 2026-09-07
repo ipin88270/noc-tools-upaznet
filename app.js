@@ -1967,7 +1967,7 @@ $('ftthSubmit').addEventListener('click', () => {
   if (type === 'odp') generateNearestRoadRoute(point.name, point.odc);
 });
 
-document.querySelectorAll('.ftth-list-table').forEach(table => table.addEventListener('click', event => {
+document.querySelectorAll('.ftth-list-table').forEach(table => table.addEventListener('click', async event => {
   const editBtn   = event.target.closest('[data-ftth-edit]');
   const deleteBtn = event.target.closest('[data-ftth-delete]');
   const validBtn  = event.target.closest('[data-ftth-valid]');
@@ -1979,13 +1979,20 @@ document.querySelectorAll('.ftth-list-table').forEach(table => table.addEventLis
     // Toggle status between 'valid' and 'check'
     const point = FTTH_POINTS[Number(validBtn.dataset.ftthValid)];
     if (!point) return;
-    point.status = point.status === 'valid' ? 'check' : 'valid';
-    writeAppData('ftthPoints', FTTH_POINTS);
+    const previousStatus = point.status || 'check';
+    point.status = previousStatus === 'valid' ? 'check' : 'valid';
+    const savedOnline = await writeAppData('ftthPoints', FTTH_POINTS);
+    if (!savedOnline) {
+      point.status = previousStatus;
+      showToast('Status gagal disimpan online. Periksa koneksi Firebase.');
+      return;
+    }
     renderFtthTables();
     // Jika panel Status Validasi sedang aktif, refresh juga
     if (document.querySelector('[data-ftth-panel="status"].active')) {
       renderFtthStatusPanel();
     }
+    showToast(point.status === 'valid' ? 'Data ditandai Valid.' : 'Data ditandai Belum Valid.');
     return;
   }
   if (!deleteBtn || !confirm('Hapus data ini?')) return;
