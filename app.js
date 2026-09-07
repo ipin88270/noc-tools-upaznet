@@ -1223,6 +1223,18 @@ async function generateNearestRoadRoute(odpName, odcName) {
   }
 }
 
+async function generateRoutesForValidPoint(point) {
+  const pairs = point.type === 'odp'
+    ? [point]
+    : FTTH_POINTS.filter(candidate => candidate.type === 'odp' && candidate.odc === point.name);
+
+  for (const odp of pairs) {
+    const odc = FTTH_POINTS.find(candidate => candidate.type === 'odc' && candidate.name === odp.odc);
+    if (odp.status !== 'valid' || !odc || odc.status !== 'valid') continue;
+    await generateNearestRoadRoute(odp.name, odc.name);
+  }
+}
+
 function generateSelectedRoute() {
   const odpName = $('ftthRouteOdp')?.value;
   const odcName = $('ftthRouteOdc')?.value;
@@ -1971,6 +1983,7 @@ document.querySelectorAll('.ftth-list-table').forEach(table => table.addEventLis
       showToast('Status gagal disimpan online. Periksa koneksi Firebase.');
       return;
     }
+    if (point.status === 'valid') await generateRoutesForValidPoint(point);
     renderFtthTables();
     // Jika panel Status Validasi sedang aktif, refresh juga
     if (document.querySelector('[data-ftth-panel="status"].active')) {
