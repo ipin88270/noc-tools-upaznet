@@ -2046,13 +2046,22 @@ $('btnValidateData')?.addEventListener('click', () => {
   showToast('Validasi data jaringan selesai.');
 });
 
-/* ── RESET FTTH DATA ke default (hapus IndexedDB key lalu reload) ── */
+/* ── CLEAR ODP/ODC DATA ──────────────────────────────────── */
 $('btnResetFtthData')?.addEventListener('click', async () => {
-  if (!confirm('Reset semua data FTTH ke data bawaan?\n\nSemua ODP, ODC, dan OTB yang telah diubah atau dihapus akan dikembalikan ke data default.')) return;
-  // Delete the storage key so next load treats it as first run and re-seeds
-  await writeAppData('ftthPoints', null);
-  showToast('Data direset. Halaman akan dimuat ulang...');
-  setTimeout(() => location.reload(), 1200);
+  if (!confirm('Kosongkan semua data ODP dan ODC?\n\nData ODP dan ODC akan dihapus dari tampilan. Data OTB tetap dipertahankan.')) return;
+  for (let index = FTTH_POINTS.length - 1; index >= 0; index--) {
+    if (FTTH_POINTS[index].type === 'odp' || FTTH_POINTS[index].type === 'odc') {
+      FTTH_POINTS.splice(index, 1);
+    }
+  }
+  ftthRoutes = [];
+  populateOdcOptions();
+  populateRouteOptions();
+  updateFtthMap(FTTH_POINTS);
+  renderFtthRoutes();
+  renderFtthTables();
+  renderFtthValidation();
+  showToast('Data ODP dan ODC berhasil dikosongkan.');
 });
 
 /* ── LOAD FTTH ODC DATABASE ──────────────────────────────── */
