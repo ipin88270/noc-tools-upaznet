@@ -343,6 +343,7 @@ const APP_DB_VERSION = 1;
 const APP_STORE_NAME = 'appData';
 const DEFAULT_DATA_ONLY = false;
 const EMPTY_DEFAULT_FTTH_NETWORK = true;
+let cloudReadFailed = false;
 let appDbPromise;
 
 function openAppDb() {
@@ -364,6 +365,7 @@ async function readAppData(key, fallback) {
     }
     return fallback;
   } catch (error) {
+    cloudReadFailed = true;
     console.error('Cloud read failed:', error);
     showToast('Data online tidak dapat dibaca. Periksa koneksi dan Firestore Rules.');
     return fallback;
@@ -3646,12 +3648,39 @@ async function initializeAppStorage() {
     renderFtthTables();
     renderHistory();
     renderCustomerTable();
-    await Promise.all([
-      writeAppData('ftthPoints', FTTH_POINTS),
-      writeAppData('ftthRoutes', ftthRoutes),
-      writeAppData(HISTORY_KEY, historyCache),
-      writeAppData(DB_KEY, customerCache),
-    ]);
+    if (!cloudReadFailed) {
+      await Promise.all([
+        writeAppData('ftthPoints', FTTH_POINTS),
+        writeAppData('ftthRoutes', ftthRoutes),
+        writeAppData(HISTORY_KEY, historyCache),
+        writeAppData(DB_KEY, customerCache),
+      ]);
+    }
+    return;
+  }
+
+  // With Firebase configured, an empty cloud state is authoritative.
+  // Never seed the old bundled dataset and overwrite imported online data.
+  if (typeof CLOUD_STATE_DOC !== 'undefined') {
+    FTTH_POINTS.splice(0, FTTH_POINTS.length);
+    ftthRoutes = [];
+    historyCache = [];
+    customerCache = [];
+    populateOdcOptions();
+    populateRouteOptions();
+    updateFtthMap(FTTH_POINTS);
+    renderFtthRoutes();
+    renderFtthTables();
+    renderHistory();
+    renderCustomerTable();
+    if (!cloudReadFailed) {
+      await Promise.all([
+        writeAppData('ftthPoints', FTTH_POINTS),
+        writeAppData('ftthRoutes', ftthRoutes),
+        writeAppData(HISTORY_KEY, historyCache),
+        writeAppData(DB_KEY, customerCache),
+      ]);
+    }
     return;
   }
 
