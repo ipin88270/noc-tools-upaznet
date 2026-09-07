@@ -340,6 +340,7 @@ const APP_DB_NAME = 'gponUpaznetDB';
 const APP_DB_VERSION = 1;
 const APP_STORE_NAME = 'appData';
 const DEFAULT_DATA_ONLY = true;
+const EMPTY_DEFAULT_FTTH_NETWORK = true;
 let appDbPromise;
 
 function openAppDb() {
@@ -2066,6 +2067,7 @@ $('btnResetFtthData')?.addEventListener('click', async () => {
 
 /* ── LOAD FTTH ODC DATABASE ──────────────────────────────── */
 async function loadOdcDatabase() {
+  if (EMPTY_DEFAULT_FTTH_NETWORK) return;
   // Only seed from JSON file on first run (storage key not yet set).
   // If the user has already interacted with data (even deleted everything),
   // the key exists as [] and we must not re-inject.
@@ -4860,6 +4862,15 @@ async function initializeAppStorage() {
     if (idx !== -1) FTTH_POINTS[idx] = pt;
     else FTTH_POINTS.push(pt);
   });
+
+  if (EMPTY_DEFAULT_FTTH_NETWORK) {
+    for (let index = FTTH_POINTS.length - 1; index >= 0; index--) {
+      if (FTTH_POINTS[index].type === 'odp' || FTTH_POINTS[index].type === 'odc') {
+        FTTH_POINTS.splice(index, 1);
+      }
+    }
+    ftthRoutes = [];
+  }
 
   // Default network points are trusted reference data and start as valid.
   FTTH_POINTS.forEach(point => {
